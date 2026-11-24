@@ -1,0 +1,215 @@
+/* MiniBlocos · Multijogador online por sala (Supabase Realtime, só "broadcast": sem tabelas e sem servidor próprio)
+   Quem CRIA a sala é o anfitrião: o mundo dele é o mundo da sala (e o save dele continua sendo gravado no celular dele).
+   Quem ENTRA gera o mesmo terreno pela seed (página recarrega com ?sala=CÓDIGO&seed=N), recebe do anfitrião o mundo atual
+   (compactado em pedaços) e depois todos trocam: blocos colocados/quebrados, portas e posição. Cada um tem o próprio inventário.
+   Não sincronizado nesta versão: animais, peixes, baús, fornos e água corrente (cada celular simula os seus). */
+const netEl=id=>document.getElementById(id);
+let netOn=false,netHost=false,netCode='',netCl=null,netCh=null,netApply=false,netReady=false,netT=0,netPT=0,netTm=0,netPosKey='',netSnap=null,netWait=0,netHello=0,netAuto=NETQ.get('sala')||'';
+const netId=Math.random().toString(36).slice(2,8);
+// perfil do jogador (nome e cor da camisa): fica salvo neste celular e vai junto com a posição para os outros
+const NETCOLS=['#d93636','#e8892b','#e6c619','#3aa655','#2fa3d6','#3b5bdb','#9c4bd6','#e86fb0','#f2f2f2','#444444'];
+const netCleanName=s=>String(s==null?'':s).replace(/[\u0000-\u001f<>]/g,'').trim().slice(0,14);
+const netCleanCol=c=>(typeof c==='string'&&/^#[0-9a-fA-F]{6}$/.test(c))?c:'';
+const netProf={n:'Jogador '+netId.slice(0,3).toUpperCase(),c:NETCOLS[parseInt(netId,36)%NETCOLS.length]};
+try{const q=JSON.parse(localStorage.getItem('miniblocos_perfil')||'null');if(q){if(netCleanName(q.n))netProf.n=netCleanName(q.n);if(netCleanCol(q.c))netProf.c=netCleanCol(q.c);}}catch(e){}
+function netSaveProf(){try{localStorage.setItem('miniblocos_perfil',JSON.stringify(netProf));}catch(e){}netPosKey='';}   // netPosKey='' força reenviar já
+const netPeers={},netQ=new Set(),netDr=[],netBuf=[],netLast=new Uint8Array(B.length);
+const netSleep=ms=>new Promise(r=>setTimeout(r,ms));
+const netOkId=v=>Number.isInteger(v)&&(v===0||!!T[v]||(v>=26&&v<=33));
+const netLink=()=>location.origin+location.pathname+'?sala='+netCode+'&seed='+SEED;
+function netStatus(s){const e=netEl('nst');if(e)e.textContent=s;}
+function netRefresh(){const inRoom=netOn&&netReady,n=Object.keys(netPeers).length;
+  netEl('nbtns').style.display=netOn?'none':'flex';netEl('njoin').style.display=netOn?'none':'flex';
+  netEl('nroom').style.display=(netOn&&netHost)?'block':'none';netEl('nleave').style.display=netOn||NETQ.get('sala')?'block':'none';
+  netEl('ncode').textContent=netCode?('Sala '+netCode):'';netEl('nlink').textContent=(netOn&&netHost)?netLink():'';
+  if(inRoom)netStatus((netHost?'Sala aberta. ':'Conectado. ')+(n?('Jogadores na sala: você + '+n+'.'):'Ninguém mais entrou ainda.')+(netHost?' Deixe este jogo aberto.':''));}
+// ---------- conexão ----------
+function netLoadLib(cb){if(window.supabase&&supabase.createClient)return cb();
+  const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
+  s.onload=cb;s.onerror=()=>netStatus('Sem internet (ou a biblioteca do Supabase foi bloqueada).');document.head.appendChild(s);}
+function netConnect(cb){
+  if(typeof NETCFG==='undefined'||!/^https:\/\//.test(NETCFG.url||'')||!NETCFG.key||/COLE_AQUI/.test(NETCFG.url+NETCFG.key)){netStatus('⚠️ Falta configurar o Supabase em js/net/config.js (veja PUBLICAR-E-JOGAR-ONLINE.md).');return;}
+  netStatus('Conectando…');
+  netLoadLib(()=>{try{
+    netCl=supabase.createClient(NETCFG.url,NETCFG.key,{realtime:{params:{eventsPerSecond:30}}});
+    netCh=netCl.channel('mb-'+netCode,{config:{broadcast:{self:false,ack:false}}});
+    netCh.on('broadcast',{event:'m'},ev=>{try{netRecv(ev.payload);}catch(e){console.error('[MiniBlocos] rede:',e);}});
+    netCh.subscribe(st=>{
+      if(st==='SUBSCRIBED'){if(!netOn){netOn=true;netLast.set(B);cb();}}
+      else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT')netStatus('Falha na conexão ('+st+'). Confira a URL e a chave do Supabase e a internet.');
+      else if(st==='CLOSED'&&netOn)netStatus('Conexão encerrada.');});
+  }catch(e){netStatus('Erro ao conectar: '+e.message);}});}
+function netSend(m){if(!netCh||!netOn)return;m.f=netId;try{netCh.send({type:'broadcast',event:'m',payload:m});}catch(e){}}
+const netRand=()=>{const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=a[Math.floor(Math.random()*a.length)];return s;};
+function netCreate(){netHost=true;netCode=netRand();
+  netConnect(()=>{netReady=true;netRefresh();toast('🌐 Sala '+netCode+' criada');});}
+function netJoin(code){netHost=false;netCode=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(netCode.length<4){netStatus('Digite o código da sala.');return;}
+  netConnect(()=>{netStatus('Procurando a sala…');let tries=0;
+    const hello=()=>{if(netReady||netSnap||tries>=3)return;tries++;netSend({t:'hello',i:netId});netHello=setTimeout(hello,2500);};hello();
+    netWait=setTimeout(()=>{if(!netReady&&!netSnap)netStatus('Não achei a sala. Confira o código e se o criador está com o jogo aberto.');},9000);});}
+function netLeave(){try{netSend({t:'bye'});if(netCl&&netCh)netCl.removeChannel(netCh);}catch(e){}
+  clearTimeout(netWait);clearTimeout(netHello);for(const id in netPeers)netDropPeer(id,true);
+  netOn=false;netReady=false;netHost=false;netCh=null;netSnap=null;netBuf.length=0;netQ.clear();netDr.length=0;
+  if(NETQ.get('sala')){location.replace(location.pathname);return;}   // volta ao seu mundo salvo
+  netStatus('Desconectado.');netRefresh();}
+// ---------- mensagens ----------
+function netRecv(m){if(!m||m.f===netId)return;
+  switch(m.t){
+    case 'hello':if(netHost&&netReady)netServe(m.i);break;
+    case 'welcome':if(m.to===netId&&!netReady&&!netSnap)netOnWelcome(m);break;
+    case 'snap':if(m.to===netId&&netSnap)netOnSnap(m);break;
+    case 'blk':if(netReady)netApplyBlocks(m);else if(netSnap)netBuf.push(m);break;
+    case 'ps':if(netReady)netPeer(m);break;
+    case 'bye':netDropPeer(m.f);break;
+    case 'tm':if(netReady&&!netHost&&Number.isFinite(m.d))dayT=((m.d%1)+1)%1;break;}}
+// anfitrião: envia o mundo atual para quem entrou
+function netEncodeWorld(){const rle=[],n=B.length;let i=0;while(i<n){const v=B[i];let c=1;while(i+c<n&&B[i+c]===v&&c<255)c++;rle.push(v,c);i+=c;}
+  const u=Uint8Array.from(rle),out=[],CH=36000;
+  for(let k=0;k<u.length;k+=CH){const sub=u.subarray(k,Math.min(k+CH,u.length));let s='';for(let j=0;j<sub.length;j+=8192)s+=String.fromCharCode.apply(null,sub.subarray(j,j+8192));out.push(btoa(s));}
+  return out;}
+async function netServe(to){const enc=netEncodeWorld();
+  const wd=waterToSave(),meta={doors:doors.map(d=>({cells:d.cells,s:d.s===-1?-1:1})),chests:chests,wd:wd.length<=30000?wd:[]};
+  netSend({t:'welcome',to,seed:SEED,n:enc.length,pos:[P.x,P.y,P.z],dayT});
+  await netSleep(250);netSend({t:'snap',to,k:-1,meta});
+  for(let k=0;k<enc.length;k++){await netSleep(170);netSend({t:'snap',to,k,d:enc[k]});}}
+// quem entra
+function netOnWelcome(m){clearTimeout(netWait);clearTimeout(netHello);
+  if(m.seed!==SEED){netStatus('Entrando na sala…');location.replace(location.pathname+'?sala='+netCode+'&seed='+m.seed);return;}   // mundo diferente: recarrega já com a seed da sala
+  netSnap={n:m.n,parts:[],got:0,meta:null,pos:m.pos,dayT:m.dayT};netStatus('Baixando o mundo… 0/'+m.n);
+  setTimeout(()=>{if(netSnap&&!netReady)netStatus('A transferência do mundo travou. Saia da sala e tente de novo.');},25000);}
+function netOnSnap(m){if(m.k===-1){netSnap.meta=m.meta||{};}else if(typeof m.d==='string'&&!netSnap.parts[m.k]){netSnap.parts[m.k]=m.d;netSnap.got++;}
+  netStatus('Baixando o mundo… '+netSnap.got+'/'+netSnap.n);
+  if(netSnap.meta&&netSnap.got===netSnap.n)netApplySnap();}
+function netApplySnap(){const sn=netSnap;
+  try{let bin='';for(let k=0;k<sn.n;k++)bin+=atob(sn.parts[k]);
+    const tmp=new Uint8Array(B.length);let pos=0;
+    for(let k=0;k+1<bin.length;k+=2){const c=bin.charCodeAt(k+1);if(pos+c>tmp.length)throw new Error('mundo inválido');tmp.fill(bin.charCodeAt(k),pos,pos+c);pos+=c;}
+    if(pos!==B.length)throw new Error('mundo incompleto');
+    for(let i=0;i<tmp.length;i++)if(!netOkId(tmp[i]))throw new Error('bloco desconhecido');
+    B.set(tmp);netLast.set(B);
+    for(let x=0;x<W;x++)for(let z=0;z<D;z++){let y=H-1;while(y>0&&!B[idx(x,y,z)])y--;hm[x*D+z]=y;}
+    const md=sn.meta;doors.length=0;if(Array.isArray(md.doors))md.doors.forEach(netDoorRec);
+    for(const k in chests)delete chests[k];
+    if(md.chests&&typeof md.chests==='object')for(const k in md.chests){const c=md.chests[k];if(!/^\d+,\d+,\d+$/.test(k)||!c||typeof c!=='object')continue;const o={};for(const q in c){const v=Math.floor(+c[q]);if(v>0&&Object.prototype.hasOwnProperty.call(inv,q))o[q]=Math.min(v,99999);}chests[k]=o;}
+    for(const f of fires.slice())removeFire(f.x,f.y,f.z);
+    for(let i=0;i<B.length;i++)if(B[i]===14)addFire(i%W,Math.floor(i/(W*D)),Math.floor(i/W)%D);else if(B[i]===15)addLamp(i%W,Math.floor(i/(W*D)),Math.floor(i/W)%D);
+    if(Array.isArray(md.wd))waterFromSave(md.wd);
+    build();
+    if(Number.isFinite(sn.dayT))dayT=((sn.dayT%1)+1)%1;
+    const ps=sn.pos||[SP0[0],0,SP0[1]],sp=safeSpawn(ps[0]+1.5,ps[2])||safeSpawn(SP0[0],SP0[1]);
+    if(sp){P.x=sp.x;P.y=sp.y;P.z=sp.z;P.vx=P.vy=P.vz=0;fallMax=P.y;stepOff=0;}
+    netQ.clear();netDr.length=0;netSnap=null;netReady=true;
+    netBuf.splice(0).forEach(netApplyBlocks);
+    netRefresh();toast('🌐 Você entrou na sala '+netCode);
+  }catch(e){console.error('[MiniBlocos] snapshot:',e);netSnap=null;netStatus('Não consegui carregar o mundo da sala ('+e.message+'). Saia e tente de novo.');}}
+// ---------- blocos e portas ----------
+function netDoorRec(r){if(!r||!Array.isArray(r.cells)||r.cells.length!==6)return;
+  if(!r.cells.every(c=>Array.isArray(c)&&c.length===3&&c.every(Number.isInteger)&&c[0]>=0&&c[0]<W&&c[1]>=0&&c[1]<H&&c[2]>=0&&c[2]<D))return;
+  const c0=r.cells[0],d=doors.find(q=>q.cells[0][0]===c0[0]&&q.cells[0][1]===c0[1]&&q.cells[0][2]===c0[2]);
+  if(d)d.s=r.s===-1?-1:1;else doors.push({cells:r.cells.map(c=>[c[0],c[1],c[2]]),s:r.s===-1?-1:1});}
+function netApplyBlocks(m){const d=Array.isArray(m.d)?m.d:[],ch=new Set(),fireAt=[];netApply=true;
+  try{if(Array.isArray(m.dr))m.dr.forEach(netDoorRec);
+    for(let k=0;k+1<d.length;k+=2){const i=d[k],v=d[k+1];if(!(i>=0&&i<B.length)||!netOkId(v))continue;const o=B[i];if(o===v)continue;
+      B[i]=v;netLast[i]=v;const x=i%W,z=Math.floor(i/W)%D,y=Math.floor(i/(W*D));
+      if(o===14||o===15)removeFire(x,y,z);if(v===14)addFire(x,y,z);else if(v===15)addLamp(x,y,z);if(o===14||o===15||v===14||v===15)fireAt.push([x,z]);
+      for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<W&&nz<D)ch.add((nx>>4)+','+(nz>>4));}
+      waterTouch(x,y,z);}
+    for(let j=doors.length-1;j>=0;j--){const c=doors[j].cells[0],b=B[idx(c[0],c[1],c[2])];if(b!==20&&b!==21)doors.splice(j,1);}   // porta quebrada por outro jogador
+    ch.forEach(k=>{const[a,b]=k.split(',');buildChunk(+a,+b);});
+    fireAt.slice(0,6).forEach(([x,z])=>buildNear(x,z));
+  }finally{netApply=false;}}
+// ganchos: toda alteração local de bloco/porta entra numa fila e é enviada em lote (a cada ~0,12 s)
+const _netBuildAt=buildAt;buildAt=function(x,y,z){_netBuildAt(x,y,z);if(netOn&&!netApply)netQ.add(idx(x,y,z));};
+const _netRebuild=rebuildCells;rebuildCells=function(cells){_netRebuild(cells);
+  if(netOn&&!netApply){cells.forEach(([x,y,z])=>netQ.add(idx(x,y,z)));const d=findDoor(cells[0][0],cells[0][1],cells[0][2]);if(d)netDr.push({cells:d.cells,s:d.s===-1?-1:1});}};
+function netFlush(){if(!netQ.size&&!netDr.length)return;const d=[];
+  for(const i of netQ){const v=B[i],o=netLast[i];if(v===o)continue;netLast[i]=v;if(v===8||(o===8&&v===0))continue;d.push(i,v);}   // água não é enviada (cada celular simula a sua)
+  netQ.clear();const dr=netDr.splice(0);if(!d.length&&!dr.length)return;
+  let k=0;do{netSend({t:'blk',d:d.slice(k,k+3000),dr:k?undefined:dr});k+=3000;}while(k<d.length);}
+// ---------- outros jogadores ----------
+function netAvatar(id,name,col){const g=new THREE.Group(),hue=[...id].reduce((a,c)=>(a*31+c.charCodeAt(0))%360,7);
+  const mk=(w,h,d,c)=>new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshBasicMaterial({color:c}));
+  const skin=0xe0b48c,shirt=new THREE.Color(netCleanCol(col)||('hsl('+hue+',60%,48%)')),pants=0x39447a;
+  const piv=(x,y,w,h,c)=>{const p=new THREE.Group();p.position.set(x,y,0);const m=mk(w,h,w,c);m.position.y=-h/2;p.add(m);g.add(p);return p;};
+  const legL=piv(-.22,1.15,.4,1.15,pants),legR=piv(.22,1.15,.4,1.15,pants),armL=piv(-.65,2.3,.35,1.1,skin),armR=piv(.65,2.3,.35,1.1,skin);
+  const torso=mk(.9,1.2,.5,shirt);torso.position.y=1.75;g.add(torso);
+  const head=new THREE.Group();head.position.y=2.35;g.add(head);   // pivô no pescoço: gira para cima/baixo conforme o outro olha
+  const hm2=mk(.65,.65,.65,skin);hm2.position.y=.325;head.add(hm2);
+  for(const sx of[-.15,.15]){const e=mk(.12,.12,.02,0x222222);e.position.set(sx,.37,-.33);head.add(e);}   // rosto virado para -z (mesma direção da câmera com yaw 0)
+  const item=mk(.5,.5,.5,0xffffff);item.position.set(0,-1.15,-.3);item.visible=false;armR.add(item);   // bloco que o outro está segurando
+  const cv=document.createElement('canvas');cv.width=256;cv.height=64;const c2=cv.getContext('2d');c2.font='bold 30px sans-serif';c2.textAlign='center';c2.fillStyle='#0008';c2.fillRect(8,8,240,48);c2.fillStyle='#fff';c2.fillText(String(name||'Jogador').slice(0,14),128,44);
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthTest:false}));sp.scale.set(2.4,.6,1);sp.position.y=3.5;sp.renderOrder=10;g.add(sp);
+  return{g,legL,legR,armL,armR,head,item,tools:{}};}
+// modelos simples das ferramentas na mão (índices = TOOLS em player/tools.js); são criados só quando o outro jogador usa a ferramenta
+function netToolModel(id){const g=new THREE.Group();
+  const bx=(w,h,d,c,x,y,z,rz)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshBasicMaterial({color:c}));m.position.set(x,y,z);if(rz)m.rotation.z=rz;g.add(m);return m;};
+  const wood='#8b5a2b',iron=(id===7||id===10||id===11||id===12)?'#8fb4e0':'#c3cbd3',stick=(len,y)=>bx(.12,len,.12,wood,0,y,0);
+  switch(id){
+    case 1:case 10:stick(1.2,.3);bx(.34,.42,.06,iron,0,1,0);break;                                                   // pá
+    case 2:case 11:stick(1.2,.3);bx(.42,.3,.1,iron,.2,.95,0);bx(.12,.5,.1,iron,.02,.95,0);break;                      // machado
+    case 3:case 7:stick(1.2,.3);bx(.8,.12,.12,iron,0,1,0);bx(.12,.2,.12,iron,-.4,.92,0);bx(.12,.2,.12,iron,.4,.92,0);break;   // picareta
+    case 4:bx(.38,.34,.38,'#b8c0c8',0,.2,0);bx(.4,.08,.4,'#6a7077',0,.4,0);break;                                      // balde
+    case 5:case 12:bx(.12,.9,.05,id===12?'#9fc3e8':'#d9e2ea',0,.75,0);bx(.45,.09,.12,'#c9a23a',0,.28,0);bx(.1,.3,.1,wood,0,.1,0);break;   // espada
+    case 6:bx(.07,.8,.04,'#c3cbd3',-.06,.75,0,.18);bx(.07,.8,.04,'#c3cbd3',.06,.75,0,-.18);bx(.1,.35,.08,'#d44',-.1,.15,0,.18);bx(.1,.35,.08,'#d44',.1,.15,0,-.18);break;   // tesoura
+    case 8:bx(.3,.4,.3,'#e8c84a',0,.25,0);bx(.34,.08,.34,'#555',0,.5,0);bx(.14,.1,.14,'#ffe8a0',0,.62,0);break;       // lanterna
+    case 9:bx(.08,.35,.08,wood,0,.1,0);bx(.08,.5,.08,wood,-.1,.5,0,.3);bx(.08,.5,.08,wood,-.1,-.3,0,-.3);bx(.02,1.2,.02,'#eeeeee',.1,.1,0);break;   // arco
+    case 13:bx(.44,.08,.44,'#b8a050',0,.2,0);bx(.06,.04,.3,'#d33',0,.26,0);break;                                      // bússola
+    case 14:bx(.16,.85,.16,'#444444',0,.45,0);bx(.2,.12,.2,'#b87333',0,.1,0);break;                                    // luneta
+    case 15:bx(.06,1.7,.06,wood,0,.7,0);bx(.16,.16,.1,'#888888',0,.15,.08);break;                                      // vara
+    default:bx(.3,.3,.3,'#aaaaaa',0,.2,0);}
+  g.rotation.x=-.5;g.visible=false;return g;}
+function netSetItem(p){const a=p.av;a.item.visible=false;for(const k in a.tools)a.tools[k].visible=false;
+  if(p.k){let m=a.tools[p.k];if(!m){m=netToolModel(p.k);m.position.set(0,-1.05,-.15);a.armR.add(m);a.tools[p.k]=m;}m.visible=true;}   // ferramenta tem prioridade
+  else if(p.h){a.item.visible=true;a.item.material.color.set(T[p.h][1]);}}
+function netFreeAv(a){scene.remove(a.g);a.g.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(o.material.map)o.material.map.dispose();o.material.dispose();}});}
+function netPeer(m){if(!Number.isFinite(m.x)||!Number.isFinite(m.y)||!Number.isFinite(m.z))return;let p=netPeers[m.f];
+  const nm=netCleanName(m.n)||'Jogador',cl=netCleanCol(m.c);
+  if(!p){p={av:netAvatar(m.f,nm,cl),nm,cl,x:m.x,y:m.y,z:m.z,r:m.r||0,sp:0,ph:0,pi:0,tp:0,h:0,k:0,hb:0};scene.add(p.av.g);netPeers[m.f]=p;toast('👤 '+nm+' entrou na sala');netRefresh();}
+  else if(p.nm!==nm||p.cl!==cl){netFreeAv(p.av);p.av=netAvatar(m.f,nm,cl);p.nm=nm;p.cl=cl;scene.add(p.av.g);netSetItem(p);}   // o outro mudou de nome ou de cor
+  p.tp=Number.isFinite(m.p)?Math.max(-1.3,Math.min(1.3,m.p)):0;p.rd=m.rd?1:0;if(Number.isFinite(m.hr))p.hr=m.hr;
+  const h=(Number.isInteger(m.h)&&T[m.h])?m.h:0,k=(Number.isInteger(m.k)&&m.k>0&&m.k<16)?m.k:0;if(p.h!==h||p.k!==k||!p.hs){p.h=h;p.k=k;p.hs=1;netSetItem(p);}
+  p.tx=m.x;p.ty=m.y;p.tz=m.z;p.tr=Number.isFinite(m.r)?m.r:p.r;p.seen=performance.now();}
+function netFreeGhost(p){if(!p.gh)return;scene.remove(p.gh);p.gh.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(o.material.map)o.material.map.dispose();o.material.dispose();}});p.gh=null;}
+function netDropPeer(id,quiet){const p=netPeers[id];if(!p)return;netFreeAv(p.av);netFreeGhost(p);
+  delete netPeers[id];if(!quiet){toast('👤 Um jogador saiu da sala');netRefresh();}}
+function netUpdPeers(dt,now){const k=1-Math.exp(-dt*12);
+  for(const id in netPeers){const p=netPeers[id];if(now-p.seen>6000){netDropPeer(id);continue;}
+    const ox=p.x,oz=p.z;p.x+=(p.tx-p.x)*k;p.y+=(p.ty-p.y)*k;p.z+=(p.tz-p.z)*k;
+    let dr=p.tr-p.r;dr=Math.atan2(Math.sin(dr),Math.cos(dr));p.r+=dr*k;
+    const v=Math.hypot(p.x-ox,p.z-oz)/Math.max(dt,.001);p.sp+=(Math.min(v/(4.5/S),1)-p.sp)*Math.min(1,dt*8);p.ph+=dt*9*p.sp;
+    const a=p.av,sw=Math.sin(p.ph)*.9*p.sp;a.g.position.set(p.x,p.y,p.z);a.g.rotation.y=p.r;
+    p.pi+=(p.tp-p.pi)*k;p.hb+=(((p.h||p.k)?.8:0)-p.hb)*Math.min(1,dt*10);   // cabeça acompanha o olhar; braço direito levanta quando segura algo
+    a.head.rotation.x=p.pi;a.legL.rotation.x=sw;a.legR.rotation.x=-sw;a.armL.rotation.x=-sw;a.armR.rotation.x=sw*(1-p.hb)+p.hb;
+    if(p.rd){   // o outro está montado: aparece sentado num cavalo selado (só visual; os animais não são sincronizados)
+      if(!p.gh){p.gh=mk('horse');horsePose(p.gh);addSaddle({g:p.gh});scene.add(p.gh);p.ghr=p.hr||0;}
+      let dh=(p.hr||0)-p.ghr;dh=Math.atan2(Math.sin(dh),Math.cos(dh));p.ghr+=dh*k;
+      p.gh.position.set(p.x,p.y-.88,p.z);p.gh.rotation.y=p.ghr;
+      const gs=Math.sin(p.ph*1.3)*.8*Math.min(1,p.sp*1.5);p.gh.userData.legs.forEach((l,i)=>{l.rotation.x=i%2?gs:-gs;});
+      a.g.position.y=p.y-.2;a.legL.rotation.x=a.legR.rotation.x=.45;a.armL.rotation.x=a.armR.rotation.x=.35;}
+    else if(p.gh)netFreeGhost(p);}}
+// chamado todo quadro por core/loop.js
+function netTick(dt,now){
+  if(netAuto){const c=netAuto;netAuto='';netOpen();netStatus('Entrando na sala '+c+'…');netJoin(c);}
+  if(!netOn)return;
+  if(netReady){netT+=dt;if(netT>=.12){netT=0;netFlush();}
+    netPT+=dt;if(netPT>=.125){const tl=(typeof tool==='number'&&tool>0&&tool<16)?tool:0,hd=(typeof names!=='undefined'&&Number.isInteger(names[cur])&&T[names[cur]])?names[cur]:0,key=[P.x.toFixed(2),P.y.toFixed(2),P.z.toFixed(2),P.yaw.toFixed(2),P.pitch.toFixed(1),hd,tl,mounted?1:0].join();
+      if(key!==netPosKey||netPT>=1){netPosKey=key;netPT=0;netSend({t:'ps',n:netProf.n,c:netProf.c,x:+P.x.toFixed(2),y:+P.y.toFixed(2),z:+P.z.toFixed(2),r:+P.yaw.toFixed(2),p:+P.pitch.toFixed(2),h:hd,k:tl,rd:mounted?1:0,hr:mounted?+mounted.rot.toFixed(2):0});}}
+    if(netHost){netTm+=dt;if(netTm>15){netTm=0;netSend({t:'tm',d:dayT});}}}
+  netUpdPeers(dt,now);}
+// ---------- painel ----------
+function netOpen(){netEl('net').style.display='flex';netRefresh();}
+netEl('nx').onclick=()=>{netEl('net').style.display='none';};
+netEl('ncreate').onclick=()=>{if(!netOn)netCreate();};
+netEl('njoinb').onclick=()=>{if(!netOn)netJoin(netEl('nin').value);};
+netEl('ncopy').onclick=()=>{const l=netLink();if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(l).then(()=>toast('🔗 Link copiado'),()=>prompt('Copie o link:',l));else prompt('Copie o link:',l);};
+netEl('nleave').onclick=netLeave;
+['nin','nname'].forEach(id=>['keydown','keyup','keypress'].forEach(ev=>netEl(id).addEventListener(ev,e=>e.stopPropagation())));
+netEl('nname').value=netProf.n;
+netEl('nname').oninput=()=>{const v=netCleanName(netEl('nname').value);if(v){netProf.n=v;netSaveProf();}};
+netEl('nname').onchange=()=>{netEl('nname').value=netProf.n;};
+function netDrawCols(){netEl('ncols').innerHTML=NETCOLS.map(c=>'<span class="ncol'+(c===netProf.c?' on':'')+'" data-c="'+c+'" style="background:'+c+'"></span>').join('');}
+netDrawCols();
+netEl('ncols').onclick=e=>{const c=e.target&&e.target.dataset&&e.target.dataset.c;if(c&&netCleanCol(c)){netProf.c=c;netSaveProf();netDrawCols();}};   // digitar o código não pode mexer o jogador
+['netopen','netopen2'].forEach(id=>{const e=netEl(id);if(e)e.onclick=ev=>{ev.stopPropagation();netOpen();};});
+addEventListener('pagehide',()=>{if(netOn)netSend({t:'bye'});});
