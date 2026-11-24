@@ -1,0 +1,14 @@
+three.js local (para jogar sem internet)
+=======================================
+
+O index.html carrega primeiro  lib/three.min.js.
+Se esse arquivo nao existir, ele tenta o CDN (precisa de internet).
+
+Para deixar o jogo 100% offline:
+  1. Baixe este arquivo (three.js versao r128, licenca MIT):
+     https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js
+  2. Salve-o NESTA pasta com o nome exato:  three.min.js
+     (ou seja: lib/three.min.js)
+
+Use a versao r128. Outras versoes tem diferencas de API e o jogo pode nao funcionar.
+O arquivo ja traz o aviso de licenca MIT no cabecalho; mantenha-o.

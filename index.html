@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MiniBlocos</title>
+
+<!-- CSS (a ordem importa só entre regras de mesma especificidade) -->
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="cross"></div>
+<div id="bar"></div>
+<div id="pk"></div>
+<div id="hud"><div id="hearts"></div><div id="food"></div></div><div id="air"></div><div id="hurt"></div><div id="toast"></div><div id="clock"></div><div id="fade"></div>
+<div id="chest"><div id="chestbox"><div id="cx2">✕</div><h2>📦 Baú</h2><p>Toque num bloco para mover 1 unidade</p><div class="lbl2">No baú</div><div id="cgrid" class="cg"></div><div class="lbl2">Seus blocos</div><div id="igrid" class="cg"></div><div id="cact"><div id="putall">Guardar tudo</div><div id="takeall">Pegar tudo</div></div></div></div>
+<div id="craft"><div id="craftbox"><div id="cx3">✕</div><h2>🔨 Bancada de trabalho</h2><p>Use os blocos do seu inventário para fabricar itens</p><div id="crlist"></div></div></div>
+<div id="furn"><div id="furnbox"><div id="cx4">✕</div><h2>🔥 Forno</h2><p id="furnp"></p><div id="fulist"></div></div></div>
+<div id="map"><div id="mapbox"><div id="mx">✕</div><h2>🌍 Mapa</h2><canvas id="mc" width="384" height="384"></canvas><p>Vermelho: você · Branco: animais · Toque no mapa para marcar um 📍 alfinete · Tecla M fecha</p><button id="pinclr">📍 Remover alfinete</button></div></div>
+<div id="net"><div id="netbox"><div id="nx">✕</div><h2>🌐 Jogar online</h2><p id="nst">Crie uma sala e passe o link para o seu amigo, ou entre com o código que ele te deu.</p>
+<div id="nprof"><div class="nlb">Seu nome e a cor da camisa</div><input id="nname" maxlength="14" placeholder="Seu nome" autocomplete="off"><div id="ncols"></div></div>
+<div id="nbtns"><div class="nb" id="ncreate">➕ Criar sala</div></div>
+<div id="njoin"><input id="nin" placeholder="Código da sala" maxlength="6" autocapitalize="characters" autocomplete="off"><div class="nb" id="njoinb">Entrar</div></div>
+<div id="nroom"><div id="ncode"></div><div class="nb" id="ncopy">🔗 Copiar link para o amigo</div><div id="nlink"></div></div>
+<div class="nb" id="nleave">Sair da sala</div></div></div>
+<div id="dismount">⬇ Descer</div>
+<div id="toprow"><div id="tools"></div><div id="mapbtn" class="tl">🌍 Mapa</div><div id="eatbtn" class="tl">🍖 Comer</div></div><div id="pb"><div></div></div>
+<div id="ib">🎒</div>
+<div id="inv"><div id="invbox"><div id="ix">✕</div><h2>🎒 Inventário</h2><p>Toque num bloco para colocá-lo no slot selecionado ou numa ferramenta para equipá-la. Tecla E fecha.</p><div id="grid"></div><div id="invact"><div id="savenow">💾 Salvar agora</div><div id="newworld">🗑 Novo mundo</div><div id="netopen">🌐 Online</div></div></div></div>
+<div id="touch">
+  <div class="tb" id="bu">▲</div>
+  <div class="tb" id="bl">◀</div>
+  <div class="tb" id="br">▶</div>
+  <div class="tb" id="bd">▼</div>
+  <div class="tb" id="bj">⤒</div>
+  <div class="tb" id="bm">Quebrar</div>
+</div>
+<div id="msg"><h1>🧱 MiniBlocos</h1>
+<p><b>Clique para jogar</b></p>
+<p>WASD mover · Espaço pular · Mouse olhar</p>
+<p>Clique esquerdo quebra · direito coloca</p>
+<p>1–6 ou roda do mouse escolhem o bloco · E inventário</p><p>Q troca a ferramenta · R troca o bloco do slot · M abre o mapa · segure o clique para minerar · Esc sai</p>
+<p>No celular: arraste para olhar, toque para agir</p><p>O mundo é salvo automaticamente</p><p><span id="netopen2">🌐 Jogar online com amigos</span></p></div>
+
+<!-- three.js r128: usa lib/three.min.js (funciona offline); se o arquivo não existir, tenta o CDN -->
+<script>
+/* diagnóstico: mostra na tela os primeiros erros de carregamento (o primeiro costuma ser a causa) */
+window.__errs=[];
+window.__report=function(m){__errs.push(m);var d=document.getElementById('errbox');
+  if(!d){d=document.createElement('div');d.id='errbox';d.style.cssText='position:fixed;left:0;right:0;top:0;z-index:9999;background:#5a0000;color:#fff;font:12px monospace;padding:8px;white-space:pre-wrap;max-height:55%;overflow:auto;visibility:visible';d.onclick=function(){d.style.display='none'};(document.body||document.documentElement).appendChild(d);}
+  d.textContent='⚠ Erros ao carregar (o 1º é a causa; toque para fechar)\n'+__errs.slice(0,8).join('\n');};
+addEventListener('error',function(e){var t=e.target,m;
+  if(t&&t!==window&&t.tagName){var u=t.src||t.href||'';m='NÃO CARREGOU: <'+t.tagName.toLowerCase()+'> '+(u?u.split('/').slice(-3).join('/'):String(t.outerHTML).slice(0,80));}
+  else{if(/ResizeObserver/.test(e.message||''))return;m=String(e.filename||'').split('/').slice(-2).join('/')+':'+e.lineno+'  '+e.message;}
+  __report(m);},true);
+</script>
+<!-- JS: a ORDEM abaixo é importante (veja README.md) -->
+
+<script>
+/* ===== Carregador do MiniBlocos =====
+   Baixa o CSS e os scripts UM POR VEZ, na ordem da lista, e tenta de novo (até 6 vezes) se algum falhar:
+   o servidor do Acode às vezes derruba arquivos quando muitos são pedidos ao mesmo tempo.
+   Para adicionar um arquivo novo ao jogo, inclua o caminho dele nas listas abaixo (a ordem importa). */
+(function(){
+var CSS=[
+ 'css/base/base.css',
+ 'css/hud/hud.css',
+ 'css/overlays/overlays.css',
+ 'css/ui/hotbar.css',
+ 'css/ui/picker.css',
+ 'css/ui/toolbar.css',
+ 'css/ui/inventory.css',
+ 'css/panels/chest.css',
+ 'css/panels/crafting.css',
+ 'css/panels/map.css',
+ 'css/panels/net.css',
+ 'css/panels/ride.css',
+ 'css/mobile/touch.css'
+],JS=[
+ 'js/world/constants.js',
+ 'js/world/blocks.js',
+ 'js/world/terrain.js',
+ 'js/storage/load-world.js',
+ 'js/render/scene.js',
+ 'js/render/textures.js',
+ 'js/render/fire.js',
+ 'js/render/chunks.js',
+ 'js/render/selection.js',
+ 'js/player/player.js',
+ 'js/inventory/items.js',
+ 'js/ui/block-icons.js',
+ 'js/ui/hotbar.js',
+ 'js/ui/inventory.js',
+ 'js/player/tools.js',
+ 'js/player/durability.js',
+ 'js/input/keyboard-mouse.js',
+ 'js/player/interaction.js',
+ 'js/input/touch.js',
+ 'js/systems/survival.js',
+ 'js/ui/hud.js',
+ 'js/combat/melee.js',
+ 'js/blocks/campfire.js',
+ 'js/blocks/chest.js',
+ 'js/blocks/bed.js',
+ 'js/blocks/doors.js',
+ 'js/blocks/workbench.js',
+ 'js/blocks/furnace.js',
+ 'js/blocks/slopes.js',
+ 'js/combat/bow.js',
+ 'js/ui/map.js',
+ 'js/blocks/hatch.js',
+ 'js/blocks/fence.js',
+ 'js/entities/ride.js',
+ 'js/blocks/bucket.js',
+ 'js/entities/animals.js',
+ 'js/entities/fish.js',
+ 'js/render/sky.js',
+ 'js/render/atmosphere.js',
+ 'js/storage/save-world.js',
+ 'js/world/water.js',
+ 'js/player/tools-extra.js',
+ 'js/net/config.js',
+ 'js/net/multiplayer.js',
+ 'js/core/loop.js',
+ 'js/main.js'
+];
+var THREE_CDN='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+var box=document.createElement('div');box.style.cssText='position:fixed;left:8px;bottom:8px;z-index:9998;background:#000a;color:#fff;font:11px monospace;padding:3px 8px;border-radius:6px;pointer-events:none';document.body.appendChild(box);
+function get(url,max,cb,fail,n){n=n||0;
+  fetch(url,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text();})
+   .then(cb,function(e){if(n<max)setTimeout(function(){get(url,max,cb,fail,n+1)},200*(n+1));else fail(e);});}
+function run(code,url){var s=document.createElement('script');s.text=code+'\n//# sourceURL='+url;document.head.appendChild(s);}
+function loadThree(cb){   // usa lib/three.min.js; se não existir, tenta o CDN
+  get('lib/three.min.js',1,function(t){run(t,'lib/three.min.js');cb();},function(){
+    var s=document.createElement('script');s.src=THREE_CDN;s.onload=cb;s.onerror=function(){cb();};document.head.appendChild(s);});}
+var all=CSS.map(function(u){return['css',u];}).concat(JS.map(function(u){return['js',u];})),i=0;
+function done(){box.parentNode&&box.parentNode.removeChild(box);
+  if(!window.THREE){document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;inset:0;z-index:99;background:#12202b;color:#fff;font:16px/1.5 sans-serif;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px"><div><h2>N\u00e3o foi poss\u00edvel carregar o three.js</h2><p>Conecte-se \u00e0 internet ou coloque o arquivo <b>three.min.js</b> (vers\u00e3o r128) na pasta <b>lib/</b>.<br>Veja <b>lib/LEIA-ME.txt</b>.</p></div></div>');}
+  setTimeout(function(){var miss=[];['W','B','rnd','hm','spawnSpot','S','waterTex','matT','scene','camera','P','updateWater'].forEach(function(n){try{if(typeof eval(n)==='undefined')miss.push(n)}catch(e){miss.push(n)}});
+    if(miss.length||!window.THREE||String(THREE.REVISION)!=='128')__report('Verificação: '+(window.THREE?'three r'+THREE.REVISION+(String(THREE.REVISION)!=='128'?' (precisa ser r128)':''):'three.js AUSENTE')+(miss.length?' | faltando: '+miss.join(', '):''));},800);}
+function next(){
+  if(i>=all.length){done();return;}
+  var it=all[i++];box.textContent='Carregando '+i+'/'+all.length+'...';
+  get(it[1],6,function(t){if(it[0]==='css'){var st=document.createElement('style');st.textContent=t;document.head.appendChild(st);}else run(t,it[1]);next();},
+    function(e){__report('NÃO CARREGOU (após 6 tentativas): '+it[1]+' - '+e.message);box.textContent='Falha ao carregar '+it[1];});}
+loadThree(next);
+})();
+</script>
+</body>
+</html>
