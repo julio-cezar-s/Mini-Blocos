@@ -1,0 +1,16 @@
+/* MiniBlocos · Painel do multijogador */
+#net{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#0008;z-index:10}
+#netbox{position:relative;box-sizing:border-box;background:#2b2b2b;border:3px solid #888;border-radius:8px;padding:14px;color:#fff;width:min(94vw,420px);max-height:92dvh;overflow:auto;touch-action:pan-y;overscroll-behavior:contain}
+#netbox h2{margin:0 0 6px;font-size:18px}#nst{margin:0 0 10px;font-size:13px;line-height:1.4;opacity:.9;min-height:18px}
+#nx{float:right;width:30px;height:30px;border-radius:6px;background:#a33;color:#fff;font-size:18px;line-height:30px;text-align:center;cursor:pointer;border:2px solid #fff6}
+.nb{padding:10px;text-align:center;background:#3a3a3a;border:2px solid #fff4;border-radius:8px;cursor:pointer;font-size:14px;margin-top:8px}
+#ncreate{background:#2d6a3a}#njoinb{background:#2d5a8a;flex:0 0 38%;margin-top:0}#nleave{display:none;background:#6a2d2d}
+#nbtns,#njoin{display:flex;gap:8px;flex-direction:column}#njoin{flex-direction:row;margin-top:10px;align-items:stretch}
+#nin{flex:1;min-width:0;padding:10px;font-size:16px;text-transform:uppercase;border-radius:8px;border:2px solid #fff4;background:#1c1c1c;color:#fff}
+#nroom{display:none;margin-top:6px}#ncode{font-size:22px;font-weight:bold;letter-spacing:2px;text-align:center}
+#nlink{font-size:11px;word-break:break-all;opacity:.8;margin-top:6px;text-align:center}
+#netopen2{display:inline-block;margin-top:12px;padding:10px 18px;background:#2d6a3a;border:2px solid #fff6;border-radius:10px;font-size:15px}
+#nprof{margin-bottom:12px}.nlb{font-size:12px;opacity:.85;margin-bottom:4px}
+#nname{box-sizing:border-box;width:100%;padding:10px;font-size:16px;border-radius:8px;border:2px solid #fff4;background:#1c1c1c;color:#fff}
+#ncols{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.ncol{width:34px;height:34px;border-radius:8px;border:3px solid #fff3;cursor:pointer;box-sizing:border-box}.ncol.on{border-color:#fff;box-shadow:0 0 0 2px #000}

@@ -1,0 +1,16 @@
+/* MiniBlocos · Barra de itens (hotbar) */
+#bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:4px;background:#0006;padding:4px;border-radius:6px}
+.slot{width:44px;height:44px;border:3px solid #555;border-radius:4px;position:relative;cursor:pointer}
+.slot.on{border-color:#fff}
+.slot span{position:absolute;left:3px;top:0;font-size:11px;color:#fff;text-shadow:0 0 2px #000}
+#bar{gap:6px;padding:6px;background:linear-gradient(#2a2a2acc,#151515cc);border:2px solid #fff3;border-radius:12px}
+.slot{width:var(--slot);height:var(--slot);box-sizing:border-box;background:#00000055;border:2px solid #ffffff33;border-radius:8px;transition:transform .12s,border-color .12s}
+.slot svg{position:absolute;left:50%;top:48%;width:calc(var(--slot) * .586);height:calc(var(--slot) * .586);transform:translate(-50%,-50%);filter:drop-shadow(0 2px 2px #0008)}
+.slot.on{border-color:#ffd54a;background:#ffffff22;transform:translateY(-6px) scale(1.08);box-shadow:0 0 10px #ffd54a88}
+.slot span{font-size:11px;left:5px;top:2px;opacity:.85}
+.slot b{right:5px;bottom:2px;font-size:12px;font-weight:700}
+.slot.z{opacity:.5}
+.slot img{position:absolute;left:50%;top:48%;width:calc(var(--slot) * .586);height:calc(var(--slot) * .586);transform:translate(-50%,-50%);image-rendering:pixelated;filter:drop-shadow(0 2px 2px #0008)}
+.slot b{position:absolute;right:3px;bottom:0;font-size:12px;color:#fff;text-shadow:0 0 2px #000}
+/* 58px em telas largas (igual ao visual de antes); encolhe para a hotbar sempre caber na largura da tela */
+#bar{--slot:min(58px,calc((100vw - 56px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)) / 6))}

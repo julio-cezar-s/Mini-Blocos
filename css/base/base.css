@@ -1,0 +1,4 @@
+/* MiniBlocos · Base: página e canvas */
+:root{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#87ceeb;font-family:system-ui,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none}
+canvas{display:block;width:100%;height:100%}

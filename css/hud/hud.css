@@ -1,0 +1,18 @@
+/* MiniBlocos · HUD: mira, barra de mineração, relógio, corações, fome e ar */
+#cross{position:fixed;left:50%;top:50%;width:20px;height:20px;transform:translate(-50%,-50%);pointer-events:none}
+#cross:before,#cross:after{content:"";position:absolute;background:#fff;mix-blend-mode:difference}
+#cross:before{left:9px;top:0;width:2px;height:20px}#cross:after{top:9px;left:0;height:2px;width:20px}
+#pb{position:fixed;left:50%;top:calc(50% + 24px);width:80px;height:8px;transform:translateX(-50%);background:#0007;border:1px solid #fff;display:none;pointer-events:none}
+#pb div{height:100%;background:#6f6}
+#clock{position:fixed;right:calc(10px + env(safe-area-inset-right,0px));top:calc(60px + env(safe-area-inset-top,0px));background:#0006;color:#fff;padding:4px 8px;border-radius:8px;font-size:13px;z-index:4;pointer-events:none}
+#hud{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom,0px));display:flex;gap:14px;z-index:2;pointer-events:none}
+#hearts,#food{display:flex;gap:1px}#food{flex-direction:row-reverse}
+#air{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(106px + env(safe-area-inset-bottom,0px));display:none;gap:1px;z-index:2;pointer-events:none;flex-direction:row-reverse}
+.hi{position:relative;width:16px;height:16px}.hi svg{width:16px;height:16px;display:block}.hf{position:absolute;left:0;top:0}
+/* seta que aponta para o alfinete do mapa */
+#pinarrow{position:fixed;right:calc(10px + env(safe-area-inset-right,0px));top:calc(6px + env(safe-area-inset-top,0px));width:52px;height:52px;background:#0007;border:2px solid #fff6;border-radius:12px;display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:bold;z-index:4;pointer-events:none;box-sizing:border-box}
+#pinarrow svg{width:28px;height:28px;display:block}
+/* bússola e luneta */
+#compass{position:fixed;left:50%;top:calc(52px + env(safe-area-inset-top,0px));transform:translateX(-50%);display:none;align-items:center;gap:8px;background:#0007;border:2px solid #fff6;border-radius:12px;padding:4px 10px;color:#fff;font-size:14px;font-weight:bold;line-height:1.2;z-index:4;pointer-events:none;white-space:nowrap}
+#compass svg{width:30px;height:30px;display:block}#compass small{font-size:11px;font-weight:normal;opacity:.9}
+#spyglass{position:fixed;inset:0;background:radial-gradient(circle closest-side,transparent 80%,#000 100%);opacity:0;pointer-events:none;z-index:3}

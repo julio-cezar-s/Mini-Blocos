@@ -1,0 +1,8 @@
+/* MiniBlocos · Seletor de bloco da hotbar */
+#pk{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));display:none;gap:6px;flex-wrap:wrap;justify-content:center;max-width:92vw;padding:8px;background:#222e;border:2px solid #fff4;border-radius:12px;z-index:6}
+.pi{position:relative;width:62px;height:66px;border:2px solid #ffffff33;border-radius:8px;background:#0006;cursor:pointer;color:#fff}
+.pi.on{border-color:#ffd54a}
+.pi svg{position:absolute;left:50%;top:40%;width:34px;height:34px;transform:translate(-50%,-50%)}
+.pi b{position:absolute;right:4px;top:2px;font-size:11px}
+.pi i{position:absolute;left:0;right:0;bottom:3px;text-align:center;font-size:10px;font-style:normal}
+.pi img{position:absolute;left:50%;top:40%;width:34px;height:34px;transform:translate(-50%,-50%);image-rendering:pixelated}

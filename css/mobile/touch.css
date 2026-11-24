@@ -1,0 +1,10 @@
+/* MiniBlocos · Controles de toque */
+#touch{position:fixed;left:0;right:0;bottom:0;pointer-events:none;display:none}
+.tb{position:fixed;width:54px;height:54px;border-radius:50%;background:#0005;color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;pointer-events:auto;border:2px solid #fff8}
+/* Posições dos botões. A hotbar ocupa até ~88px (+ safe-area) do rodapé, então o D-pad começa acima disso. */
+#bu{left:calc(70px + env(safe-area-inset-left,0px));bottom:calc(206px + env(safe-area-inset-bottom,0px))}
+#bl{left:calc(14px + env(safe-area-inset-left,0px));bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+#br{left:calc(126px + env(safe-area-inset-left,0px));bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+#bd{left:calc(70px + env(safe-area-inset-left,0px));bottom:calc(94px + env(safe-area-inset-bottom,0px))}
+#bj{right:calc(14px + env(safe-area-inset-right,0px));bottom:calc(110px + env(safe-area-inset-bottom,0px))}
+#bm{right:calc(14px + env(safe-area-inset-right,0px));bottom:calc(170px + env(safe-area-inset-bottom,0px));font-size:13px}

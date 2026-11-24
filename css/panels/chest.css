@@ -1,0 +1,14 @@
+/* MiniBlocos · Painel do baú */
+#chest{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#0008;z-index:7}
+#chestbox{position:relative;background:#2b2b2b;border:3px solid #888;border-radius:8px;padding:14px;color:#fff;max-width:94vw;max-height:92vh;overflow:auto}
+#chestbox h2{margin:0 0 4px;font-size:18px}#chestbox p{margin:0 0 6px;font-size:12px;opacity:.8}
+.lbl2{font-size:12px;opacity:.85;margin:8px 0 4px}
+.cg{display:grid;grid-template-columns:repeat(6,46px);gap:5px;min-height:22px}
+#cx2{position:sticky;top:-6px;float:right;margin:-6px -6px 0 8px;z-index:1;width:30px;height:30px;border-radius:6px;background:#a33;color:#fff;font-size:18px;line-height:30px;text-align:center;cursor:pointer;border:2px solid #fff6}
+#cact{display:flex;gap:8px;margin-top:10px}
+#cact div{flex:1;padding:8px;text-align:center;background:#3a3a3a;border:2px solid #fff4;border-radius:8px;cursor:pointer;font-size:13px}
+/* box-sizing: sem isso o padding e a borda somavam ~34px e o painel passava da altura/largura da tela; dvh = altura visível no celular; rolagem com o dedo */
+#chestbox{box-sizing:border-box;max-height:92dvh;touch-action:pan-y;overscroll-behavior:contain}
+/* cabeçalho fixo e opaco: as linhas rolam por baixo dele e nunca ficam sob o botão ✕ */
+#chestbox h2{position:sticky;top:-14px;z-index:1;background:#2b2b2b;margin:-14px -14px 8px;padding:14px 48px 6px 14px}
+#cx2{z-index:2}

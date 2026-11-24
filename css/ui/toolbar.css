@@ -1,0 +1,8 @@
+/* MiniBlocos · Botões do topo: ferramenta, mapa e comer */
+#tools{position:fixed;left:calc(10px + env(safe-area-inset-left,0px));top:calc(10px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:4px;z-index:4}
+.tl{padding:6px 10px;background:#0006;color:#fff;border:2px solid #555;border-radius:6px;font-size:13px;cursor:pointer}
+.tl.on{border-color:#fff;background:#0009}
+.ic svg{width:22px;height:22px;display:block}
+#toprow{position:fixed;left:calc(10px + env(safe-area-inset-left,0px));top:calc(10px + env(safe-area-inset-top,0px));display:flex;gap:6px;align-items:flex-start;z-index:4}
+#toprow #tools{position:static}
+#mapbtn,#eatbtn{white-space:nowrap}
