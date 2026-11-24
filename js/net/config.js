@@ -4,7 +4,8 @@
    3) cole os dois valores abaixo (a chave anon é pública por natureza; pode ficar no GitHub)
    Veja PUBLICAR-E-JOGAR-ONLINE.md */
 
-const NETCFG = {
+
+window.NETCFG = {
   url: "https://utcogiwrbszmwxlslahk.supabase.co",
   key: "sb_publishable_ZxWM-WXzQn2wCX9v8lmEPA_P6fLeleQ"
 };
