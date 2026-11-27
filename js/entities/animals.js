@@ -153,8 +153,10 @@ function hitPlayerAnimal(a,x,y,z,r,hh){
   const dx=x-px;
   const dz=z-pz;
   const min=pr+r;
+  const dist=Math.hypot(dx,dz);
+  const oldDist=Math.hypot(a.x-px,a.z-pz);
 
-  return dx*dx+dz*dz<min*min;
+  return dist<min&&dist<oldDist;
 }
 // animal preso dentro de um bloco (alguém colocou um bloco, fechou porta/portão ou o terreno mudou em cima dele): tira de lá
 function unstick(a,r,hh){
