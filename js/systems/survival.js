@@ -11,6 +11,7 @@ function damage(n){
 
   if(hp<=0){
     playerDead=true;
+    startDeathAnimation();
   }
 }
 // ---- respawn seguro: nunca na água, em cima de árvore, em parede ou na cama destruída ----
