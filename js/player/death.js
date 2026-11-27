@@ -98,6 +98,7 @@ deathAnimation={
   cameraStart,
   cameraEnd
 };
+}
 
 // Atualiza a queda
 function updateDeathAnimation(dt){
