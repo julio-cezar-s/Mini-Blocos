@@ -1,4 +1,3 @@
-
 /* MiniBlocos · Personagem e animação de morte */
 
 let deathActor = null;
