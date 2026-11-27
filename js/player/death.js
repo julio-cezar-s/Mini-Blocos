@@ -77,12 +77,27 @@ function startDeathAnimation(){
 
   scene.add(deathActor);
 
-  deathAnimation={
-    time:0,
-    duration:2.2,
-    startY:deathActor.position.y
-  };
-}
+  const direction = new THREE.Vector3(
+  Math.sin(P.yaw),
+  0,
+  Math.cos(P.yaw)
+);
+
+const cameraStart = camera.position.clone();
+
+const cameraEnd = new THREE.Vector3(
+  P.x + direction.x * 4,
+  P.y + 2.2,
+  P.z + direction.z * 4
+);
+
+deathAnimation={
+  time:0,
+  duration:2.2,
+  startY:deathActor.position.y,
+  cameraStart,
+  cameraEnd
+};
 
 // Atualiza a queda
 function updateDeathAnimation(dt){
