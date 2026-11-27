@@ -241,6 +241,15 @@ function updA(a,dt){
       if(hitPlayerAnimal(a,a.x,a.y,a.z+dz,r,hh)){blocked=true;byP=true;break;}
       if(!hitB(a.x,a.y,a.z+dz,r,hh)&&(s.swim||!wet(a.x,a.z+dz)))a.z+=dz;else{blocked=true;break;}}}
   if(blocked){a.bl+=dt;if(!byP&&a.gr&&a.bl<.5)a.vy=10;if(a.bl>(byP?.5:.8)){a.th=a.rot+(Math.random()<.5?-1:1)*(1.2+Math.random()*1.4);a.bl=0;}}else a.bl=0;
+   // se o jogador andou para cima do animal, empurra o animal para fora (sem atravessar blocos)
+  if(!a.rider){
+    const dead=playerDead&&deathActor,px=dead?deathActor.position.x:P.x,pz=dead?deathActor.position.z:P.z,
+      py=dead?deathActor.position.y-1.42:P.y,ph=dead?2.55:PH,mn=(dead?.55:.3/S)+r,
+      ddx=a.x-px,ddz=a.z-pz,dd=Math.hypot(ddx,ddz);
+    if(dd<mn&&a.y+hh>py&&a.y<py+ph){
+      const ux=dd>.001?ddx/dd:Math.sin(a.rot),uz=dd>.001?ddz/dd:Math.cos(a.rot),pu=(mn-dd)*Math.min(1,dt*10);
+      if(!hitB(a.x+ux*pu,a.y,a.z,r,hh)&&(s.swim||!wet(a.x+ux*pu,a.z)))a.x+=ux*pu;
+      if(!hitB(a.x,a.y,a.z+uz*pu,r,hh)&&(s.swim||!wet(a.x,a.z+uz*pu)))a.z+=uz*pu;}}
  // separação: animais não ficam um dentro do outro
   for(const b of animals){if(b===a)continue;const ddx=a.x-b.x,ddz=a.z-b.z,dd=Math.hypot(ddx,ddz),rr=(r+SPEC[b.k].r/S)*.9;
     if(dd>.001&&dd<rr){const p=(rr-dd)*.5*Math.min(1,dt*4),nx=a.x+ddx/dd*p,nz=a.z+ddz/dd*p;
