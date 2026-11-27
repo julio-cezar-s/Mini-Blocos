@@ -1,6 +1,7 @@
 /* MiniBlocos · Vida, fome, ar, dano, respawn, comer e vitals */
 // vida e fome
 let hp=20,food=20,air=10,hungerT=0,regT=0,airT=0,fallMax=0,meat=0,apples=0,cooked=0,cooks=[],atkCool=0,hudKey='';
+let playerDead=false;
 const AHP={pig:3,cow:4,chicken:2,sheep:3,rabbit:1,horse:5,goat:3,duck:2},DROP={pig:3,cow:3,chicken:1,sheep:2,rabbit:1,horse:4,goat:2,duck:1};
 function damage(n){if(hp<=0)return;hp=Math.max(0,hp-n);flash();if(hp<=0)respawn();}
 // ---- respawn seguro: nunca na água, em cima de árvore, em parede ou na cama destruída ----
