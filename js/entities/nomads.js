@@ -118,23 +118,158 @@ const count=()=>animals.filter(a=>a.k==='nomad').length;
 VILLAGE.doors.forEach((d,i)=>{if(i<MAXN)spawnNomad(d.x+(Math.random()-.5)*2,d.z+(Math.random()-.5)*2);});
 spawnNomad(VILLAGE.cx+2.5,VILLAGE.cz);   // um sentado perto da fogueira
 
-// ---------- comportamento ----------
+
+// ---------- comportamento e conversas avançadas ----------
 let lastTalk=-1e9;
+
 const _updA=updA;
+const _nomadDir=new THREE.Vector3();
+const _nomadLook=new THREE.Vector3();
+
+function randomTalk(list){
+  return list[Math.floor(Math.random()*list.length)];
+}
+
+function getNomadDialogue(a,looking){
+  const hr=typeof dayT==='number'?(dayT*24)%24:12;
+
+  // Avisos contextuais sobre o horário
+  if(hr>=18&&hr<21&&Math.random()<.65)
+    return '🌇 '+randomTalk([
+      'O sol está se pondo. Volte para a aldeia!',
+      'A noite está chegando. Prepare sua fogueira.',
+      'Não recomendo explorar a floresta agora.',
+      'É melhor encontrar uma cama antes que fique escuro.'
+    ]);
+
+  if(hr>=21||hr<5)
+    return '🌙 '+randomTalk([
+      'Você está andando por aí a esta hora? Tenha cuidado!',
+      'A noite pertence aos predadores. Fique alerta!',
+      'Eu não sairia da aldeia agora se fosse você.',
+      'Ouvi barulhos estranhos perto da floresta...'
+    ]);
+
+  // Alterna os assuntos das conversas
+  const roll=Math.random();
+
+  if(looking&&roll<.45)
+    return randomTalk(TALK.olhar);
+
+  if(roll<.68)
+    return randomTalk(TALK.avisos);
+
+  if(roll<.85)
+    return randomTalk(TALK.historias);
+
+  return randomTalk(TALK.humor);
+}
+
 updA=function(a,dt){
-  if(a.k!=='nomad'){_updA(a,dt);return;}
-  const dx=P.x-a.x,dz=P.z-a.z,dist=Math.hypot(dx,dz),now=performance.now();
-  a.talkT=Math.max(0,a.talkT-dt);a.giftT=Math.max(0,a.giftT-dt);
+  if(a.k!=='nomad'){
+    _updA(a,dt);
+    return;
+  }
+
+  const dx=P.x-a.x;
+  const dz=P.z-a.z;
+  const dist=Math.hypot(dx,dz);
+  const now=performance.now();
+
+  a.talkT=Math.max(0,a.talkT-dt);
+  a.giftT=Math.max(0,a.giftT-dt);
+
   const live=typeof playing!=='undefined'&&playing&&hp>0;
+
+  // Verifica se o jogador está olhando para o nômade
+  let looking=false;
+
+  if(live&&dist<9&&typeof camera!=='undefined'){
+    camera.getWorldDirection(_nomadDir);
+
+    _nomadLook.set(
+      a.g.position.x-camera.position.x,
+      a.g.position.y+1.1-camera.position.y,
+      a.g.position.z-camera.position.z
+    ).normalize();
+
+    looking=_nomadDir.dot(_nomadLook)>.94;
+  }
+
   if(!(a.flee>0)){
-    if(Math.hypot(a.x-VILLAGE.cx,a.z-VILLAGE.cz)>20){a.th=Math.atan2(VILLAGE.cx-a.x,VILLAGE.cz-a.z);a.mv=true;a.gz=false;a.tt=2;}   // não se afasta muito da aldeia
-    else if(live&&dist<4&&Math.abs(P.y-a.y)<3){   // jogador chegou perto: para, olha e cumprimenta
-      a.mv=false;a.gz=false;a.tt=2.5;a.th=Math.atan2(dx,dz);
-      if(a.talkT<=0&&now-lastTalk>4000){a.talkT=25;lastTalk=now;
-        toast('🧕 '+a.nm+': “'+TALK[Math.floor(Math.random()*TALK.length)]+'”');
-        if(a.giftT<=0&&Math.random()<.3){a.giftT=120;apples++;setTimeout(()=>toast('🍎 '+a.nm+' te deu uma maçã'),2600);}}}}
+    if(Math.hypot(a.x-VILLAGE.cx,a.z-VILLAGE.cz)>20){
+      a.th=Math.atan2(VILLAGE.cx-a.x,VILLAGE.cz-a.z);
+      a.mv=true;
+      a.gz=false;
+      a.tt=2;
+    }
+    else if(live&&
+      (dist<4||(looking&&dist<9))&&
+      Math.abs(P.y-a.y)<3){
+
+      a.mv=false;
+      a.gz=false;
+      a.tt=2.5;
+      a.th=Math.atan2(dx,dz);
+
+      // Evita conversas repetidas e excesso de mensagens
+      if(a.talkT<=0&&now-lastTalk>2200){
+
+        const first=!a.metPlayer;
+        a.metPlayer=true;
+
+        let message;
+
+        if(first){
+          message=randomTalk(TALK.chegada);
+        }else{
+          message=getNomadDialogue(a,looking);
+        }
+
+        a.talkT=first?18:24;
+        lastTalk=now;
+
+        toast('🧕 '+a.nm+': “'+message+'”');
+
+        // Presentes ocasionais
+        if(a.giftT<=0&&Math.random()<.20){
+          a.giftT=150;
+
+          setTimeout(()=>{
+            if(typeof apples!=='undefined'){
+              apples++;
+              toast('🍎 '+a.nm+' te presenteou com uma maçã!');
+            }
+          },2200);
+        }
+      }
+    }
+  }
+
   _updA(a,dt);
 };
+
+// ---------- reposição de moradores ----------
+let chkT=0;
+const _resp=respawnAnimals;
+
+respawnAnimals=function(dt){
+  _resp(dt);
+  chkT+=dt;
+
+  if(chkT<30)return;
+  chkT=0;
+
+  if(count()<MAXN){
+    const d=VILLAGE.doors[
+      Math.floor(Math.random()*VILLAGE.doors.length)
+    ];
+
+    if(d)spawnNomad(d.x,d.z);
+  }
+};
+})();
+
 
 // repõe nômades que sumirem (ex.: ficaram presos num bloco): confere de 30 em 30 segundos
 let chkT=0;const _resp=respawnAnimals;
