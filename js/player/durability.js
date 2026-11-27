@@ -13,7 +13,7 @@ const TIERS=[
 TIERS.forEach(t=>{const nm=['Pá','Machado','Picareta','Espada'],de=['cava terra, grama, areia, neve, cascalho e argila','corta madeira e abóbora; machuca bem os animais','quebra pedra, minérios, tijolo e metal','dano alto e mais carne dos animais'];
   const props=[{m:ST.sh,sp:t.sp},{m:ST.ax,sp:t.sp,dm:t.ax},{m:ST.pk,sp:t.sp},{m:[],dm:t.sw,bonus:t.bn,sw:1}];
   for(let j=0;j<4;j++){const i=t.ids[j];TOOLS[i]=Object.assign({n:nm[j]+' de '+t.n,mx:t.mx,dig:1,d:de[j]+' ('+t.mx+' usos)'},props[j]);
-    ICONS[i]=j<3?BASEI[j].replace(/#c3cbd3/g,t.hc):BASEI[3].replace('#d9e2ea',t.sc);}});
+    ICONS[i]=pixToolIcon(j,t.n);}});
 // utensílios com durabilidade (0 = infinita): tesoura, lanterna (queima com o tempo), arco (por tiro) e vara (por lançamento)
 TOOLS[6].mx=120;TOOLS[6].dig=1;TOOLS[8].mx=300;TOOLS[9].mx=200;TOOLS[15].mx=60;
 // posse e durabilidade atual: OWN[i] = possui · TD[i] = durabilidade (0 = infinita, -1 = não possui)

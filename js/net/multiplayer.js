@@ -188,26 +188,13 @@ function netAvatar(id,name,col){const g=new THREE.Group(),U=3/32;
   const nc=document.createElement('canvas');nc.width=256;nc.height=64;const c2=nc.getContext('2d');c2.font='bold 30px sans-serif';c2.textAlign='center';c2.fillStyle='#0008';c2.fillRect(8,8,240,48);c2.fillStyle='#fff';c2.fillText(String(name||'Jogador').slice(0,14),128,44);
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(nc),transparent:true,depthTest:false}));sp.scale.set(2.4,.6,1);sp.position.y=3.45;sp.renderOrder=10;g.add(sp);
   return{g,legL,legR,armL,armR,head,item,tools:{},mat};}
-// modelos simples das ferramentas na mão (índices = TOOLS em player/tools.js); são criados só quando o outro jogador usa a ferramenta
-function netToolModel(id){const g=new THREE.Group();
-  const bx=(w,h,d,c,x,y,z,rz)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshBasicMaterial({color:c}));m.position.set(x,y,z);if(rz)m.rotation.z=rz;g.add(m);return m;};
-  const wood='#8b5a2b',iron=(id===7||id===10||id===11||id===12)?'#8fb4e0':'#c3cbd3',stick=(len,y)=>bx(.12,len,.12,wood,0,y,0);
-  switch(id){
-    case 1:case 10:stick(1.2,.3);bx(.34,.42,.06,iron,0,1,0);break;                                                   // pá
-    case 2:case 11:stick(1.2,.3);bx(.42,.3,.1,iron,.2,.95,0);bx(.12,.5,.1,iron,.02,.95,0);break;                      // machado
-    case 3:case 7:stick(1.2,.3);bx(.8,.12,.12,iron,0,1,0);bx(.12,.2,.12,iron,-.4,.92,0);bx(.12,.2,.12,iron,.4,.92,0);break;   // picareta
-    case 4:bx(.38,.34,.38,'#b8c0c8',0,.2,0);bx(.4,.08,.4,'#6a7077',0,.4,0);break;                                      // balde
-    case 5:case 12:bx(.12,.9,.05,id===12?'#9fc3e8':'#d9e2ea',0,.75,0);bx(.45,.09,.12,'#c9a23a',0,.28,0);bx(.1,.3,.1,wood,0,.1,0);break;   // espada
-    case 6:bx(.07,.8,.04,'#c3cbd3',-.06,.75,0,.18);bx(.07,.8,.04,'#c3cbd3',.06,.75,0,-.18);bx(.1,.35,.08,'#d44',-.1,.15,0,.18);bx(.1,.35,.08,'#d44',.1,.15,0,-.18);break;   // tesoura
-    case 8:bx(.3,.4,.3,'#e8c84a',0,.25,0);bx(.34,.08,.34,'#555',0,.5,0);bx(.14,.1,.14,'#ffe8a0',0,.62,0);break;       // lanterna
-    case 9:bx(.08,.35,.08,wood,0,.1,0);bx(.08,.5,.08,wood,-.1,.5,0,.3);bx(.08,.5,.08,wood,-.1,-.3,0,-.3);bx(.02,1.2,.02,'#eeeeee',.1,.1,0);break;   // arco
-    case 13:bx(.44,.08,.44,'#b8a050',0,.2,0);bx(.06,.04,.3,'#d33',0,.26,0);break;                                      // bússola
-    case 14:bx(.16,.85,.16,'#444444',0,.45,0);bx(.2,.12,.2,'#b87333',0,.1,0);break;                                    // luneta
-    case 15:bx(.06,1.7,.06,wood,0,.7,0);bx(.16,.16,.1,'#888888',0,.15,.08);break;                                      // vara
-    default:bx(.3,.3,.3,'#aaaaaa',0,.2,0);}
-  g.rotation.x=-.5;g.visible=false;return g;}
+// ferramenta na mão: o ícone em pixel art (js/ui/pixel-icons.js) extrudado em 3D, como no Minecraft; criado só quando o outro jogador usa a ferramenta
+function netToolModel(id){const holder=new THREE.Group(),grid=pixToolGridById(id);
+  if(grid){const s=({4:.07,6:.085,8:.065,13:.06})[id]||.1,pv=pixPivotById(id),m=pixExtrude(grid,s,s*2);m.position.set(-(pv[0]-8)*s,(pv[1]-8)*s,0);   // a mão segura o ponto do cabo
+    holder.add(m);holder.rotation.y=Math.PI/2;holder.rotation.z=-.35;}   // o ícone fica de lado, com a ponta para cima e para a frente
+  holder.visible=false;return holder;}
 function netSetItem(p){const a=p.av;a.item.visible=false;for(const k in a.tools)a.tools[k].visible=false;
-  if(p.k){let m=a.tools[p.k];if(!m){m=netToolModel(p.k);m.position.set(0,-1.05,-.15);a.armR.add(m);a.tools[p.k]=m;}m.visible=true;}   // ferramenta tem prioridade
+  if(p.k){let m=a.tools[p.k];if(!m){m=netToolModel(p.k);m.position.set(0,-.9,-.12);a.armR.add(m);a.tools[p.k]=m;}m.visible=true;}   // ferramenta tem prioridade
   else if(p.h){a.item.visible=true;a.item.material.color.set(T[p.h][1]);}}
 function netFreeAv(a){scene.remove(a.g);a.g.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(o.material.map)o.material.map.dispose();o.material.dispose();}});}
 function netPeer(m){if(!Number.isFinite(m.x)||!Number.isFinite(m.y)||!Number.isFinite(m.z))return;let p=netPeers[m.f];
@@ -215,7 +202,7 @@ function netPeer(m){if(!Number.isFinite(m.x)||!Number.isFinite(m.y)||!Number.isF
   if(!p){p={av:netAvatar(m.f,nm,cl),nm,cl,x:m.x,y:m.y,z:m.z,r:m.r||0,sp:0,ph:0,pi:0,tp:0,h:0,k:0,hb:0};scene.add(p.av.g);netPeers[m.f]=p;toast('👤 '+nm+' entrou na sala');netRefresh();}
   else if(p.nm!==nm||p.cl!==cl){netFreeAv(p.av);p.av=netAvatar(m.f,nm,cl);p.nm=nm;p.cl=cl;scene.add(p.av.g);netSetItem(p);}   // o outro mudou de nome ou de cor
   p.tp=Number.isFinite(m.p)?Math.max(-1.3,Math.min(1.3,m.p)):0;p.rd=m.rd?1:0;if(Number.isFinite(m.hr))p.hr=m.hr;
-  const h=(Number.isInteger(m.h)&&T[m.h])?m.h:0,k=(Number.isInteger(m.k)&&m.k>0&&m.k<16)?m.k:0;if(p.h!==h||p.k!==k||!p.hs){p.h=h;p.k=k;p.hs=1;netSetItem(p);}
+  const h=(Number.isInteger(m.h)&&T[m.h])?m.h:0,k=(Number.isInteger(m.k)&&m.k>0&&m.k<TOOLS.length)?m.k:0;if(p.h!==h||p.k!==k||!p.hs){p.h=h;p.k=k;p.hs=1;netSetItem(p);}
   p.tx=m.x;p.ty=m.y;p.tz=m.z;p.tr=Number.isFinite(m.r)?m.r:p.r;p.seen=performance.now();}
 function netFreeGhost(p){if(!p.gh)return;scene.remove(p.gh);p.gh.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(o.material.map)o.material.map.dispose();o.material.dispose();}});p.gh=null;}
 function netDropPeer(id,quiet){const p=netPeers[id];if(!p)return;netFreeAv(p.av);netFreeGhost(p);
@@ -241,7 +228,7 @@ function netTick(dt,now){
   if(netAuto){const c=netAuto;netAuto='';netOpen();netStatus('Entrando na sala '+c+'…');netJoin(c);}
   if(!netOn)return;
   if(netReady){netT+=dt;if(netT>=.12){netT=0;netFlush();}
-    netPT+=dt;if(netPT>=.125){const tl=(typeof tool==='number'&&tool>0&&tool<16)?tool:0,hd=(typeof names!=='undefined'&&Number.isInteger(names[cur])&&T[names[cur]])?names[cur]:0,key=[P.x.toFixed(2),P.y.toFixed(2),P.z.toFixed(2),P.yaw.toFixed(2),P.pitch.toFixed(1),hd,tl,mounted?1:0].join();
+    netPT+=dt;if(netPT>=.125){const tl=(typeof tool==='number'&&tool>0&&tool<TOOLS.length)?tool:0,hd=(typeof names!=='undefined'&&Number.isInteger(names[cur])&&T[names[cur]])?names[cur]:0,key=[P.x.toFixed(2),P.y.toFixed(2),P.z.toFixed(2),P.yaw.toFixed(2),P.pitch.toFixed(1),hd,tl,mounted?1:0].join();
       if(key!==netPosKey||netPT>=1){netPosKey=key;netPT=0;netSend({t:'ps',n:netProf.n,c:netProf.c,x:+P.x.toFixed(2),y:+P.y.toFixed(2),z:+P.z.toFixed(2),r:+P.yaw.toFixed(2),p:+P.pitch.toFixed(2),h:hd,k:tl,rd:mounted?1:0,hr:mounted?+mounted.rot.toFixed(2):0});}}
     if(netHost){netTm+=dt;if(netTm>15){netTm=0;netSend({t:'tm',d:dayT});}}}
   netUpdPeers(dt,now);}

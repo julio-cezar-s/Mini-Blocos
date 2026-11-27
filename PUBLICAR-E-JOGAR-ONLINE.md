@@ -43,6 +43,7 @@ Quando mudar um arquivo depois, é só enviar de novo para o GitHub; o link cont
 - Se o anfitrião fechar o jogo, quem já está dentro continua vendo as alterações uns dos outros, mas ninguém novo consegue entrar até ele voltar.
 
 ## Problemas comuns
+- **Mensagem "⚠️ A URL/chave do Supabase em config.js está errada"**: o jogo confere o `config.js` e diz o que está errado. A URL é só `https://SEU-PROJETO.supabase.co` (sem barra no fim e sem `/rest/v1`); a chave é a **anon public** inteira, numa linha só, sem espaço. Depois de corrigir, envie o arquivo ao GitHub e atualize a página.
 - **"Falta configurar o Supabase"**: faltou colar a URL e a chave em `js/net/config.js` (e enviar o arquivo atualizado ao GitHub).
 - **"Falha na conexão"**: URL ou chave erradas, ou sem internet.
 - **"Não achei a sala"**: código errado, ou o anfitrião não está com o jogo aberto na sala.
