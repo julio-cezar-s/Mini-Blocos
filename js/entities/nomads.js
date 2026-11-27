@@ -5,10 +5,21 @@
 if(typeof VILLAGE==='undefined'||!VILLAGE)return;   // sem aldeia neste mundo: nada a fazer
 SPEC.nomad={b:[.5,.7,.26,'#d8c090'],l:[.16,.8,'#5a4630'],h:[.3,'#c68a5a'],x:[],v:1,r:.25,hh:1.75};
 AHP.nomad=999;DROP.nomad=0;                  // vida enorme: não dá para matar
-const NAMES=['Amir','Zahra','Tariq','Leila','Omar','Samira','Karim','Nadia','Yusuf','Farida'];
-const TALK=['Salve, viajante! Que a sombra te acompanhe.','Cuidado com lobos e ursos longe da aldeia.','Cobras se escondem no mato: olhe onde pisa.',
-  'Venha se aquecer na nossa fogueira.','Já viu a onça rondando por aí? Nunca ande sozinho à noite.','Viajamos de terra em terra, mas esta aldeia é nossa casa.',
-  'O javali investe sem avisar. Fique de olho!','Durma numa cama para guardar o seu retorno.'];
+const
+   NAMES=['Amir','Zahra','Tariq','Leila','Omar','Samira','Karim','Nadia','Yusuf','Farida'];
+   const TALK={
+      chegada:[
+      'Ei, viajante! Você tem cara de quem veio de muito longe.',
+      'Finalmente um rosto novo por aqui!',
+      'Que os bons ventos acompanhem sua jornada.',
+      'Nossa aldeia é pequena, mas sempre há espaço para mais um.',
+      'Se procura abrigo, nossa fogueira ainda está acesa.',
+      'As estradas são perigosas. Fique por perto quando escurecer.',
+      'Você parece alguém que sabe sobreviver neste mundo.',
+      'De onde vem, viajante? Nunca vi roupas como as suas!',
+      'Cuidado com o caminho. Nem tudo que parece tranquilo é seguro.',
+      'Que bom encontrar alguém por aqui. A solidão cansa!'
+      ],
 const ROBES=[['#d8c090','#b08a50','#f0e8d0'],['#3a5a8a','#2a4468','#d8d0c0'],['#a8402a','#80301e','#e8dcc0'],['#e8e0d0','#c8c0b0','#a8402a'],['#6a7a3a','#4e5a2a','#e0d4a8']];
 const SKINS=['#c68a5a','#a8693e','#8a5232','#d8a070'];
 const MAXN=Math.max(5,VILLAGE.doors.length);   // quantos nômades vivem na aldeia
