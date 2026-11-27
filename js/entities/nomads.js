@@ -5,10 +5,75 @@
 if(typeof VILLAGE==='undefined'||!VILLAGE)return;   // sem aldeia neste mundo: nada a fazer
 SPEC.nomad={b:[.5,.7,.26,'#d8c090'],l:[.16,.8,'#5a4630'],h:[.3,'#c68a5a'],x:[],v:1,r:.25,hh:1.75};
 AHP.nomad=999;DROP.nomad=0;                  // vida enorme: não dá para matar
-const NAMES=['Amir','Zahra','Tariq','Leila','Omar','Samira','Karim','Nadia','Yusuf','Farida'];
-const TALK=['Salve, viajante! Que a sombra te acompanhe.','Cuidado com lobos e ursos longe da aldeia.','Cobras se escondem no mato: olhe onde pisa.',
-  'Venha se aquecer na nossa fogueira.','Já viu a onça rondando por aí? Nunca ande sozinho à noite.','Viajamos de terra em terra, mas esta aldeia é nossa casa.',
-  'O javali investe sem avisar. Fique de olho!','Durma numa cama para guardar o seu retorno.'];
+const
+   NAMES=['Amir','Zahra','Tariq','Leila','Omar','Samira','Karim','Nadia','Yusuf','Farida'];
+   const TALK={
+      chegada:[
+         'Ei, viajante! Você tem cara de quem veio de muito longe.',
+         'Finalmente um rosto novo por aqui!',
+         'Que os bons ventos acompanhem sua jornada.',
+         'Nossa aldeia é pequena, mas sempre há espaço para mais um.',
+         'Se procura abrigo, nossa fogueira ainda está acesa.',
+         'As estradas são perigosas. Fique por perto quando escurecer.',
+         'Você parece alguém que sabe sobreviver neste mundo.',
+         'De onde vem, viajante? Nunca vi roupas como as suas!',
+         'Cuidado com o caminho. Nem tudo que parece tranquilo é seguro.',
+         'Que bom encontrar alguém por aqui. A solidão cansa!'
+      ],
+
+      olhar:[
+         'Está procurando alguma coisa no meu rosto?',
+         'Haha! Nunca viu um viajante antes?',
+         'Precisa de alguma coisa? Posso tentar ajudar.',
+         'Bela ferramenta! Foi você quem fabricou?',
+         'Não sou muito bom em conversas, mas gosto de conhecer pessoas.',
+         'Está tudo bem? Você parece estar procurando alguma coisa.',
+         'Se descobrir algum lugar interessante, conte para nós!',
+         'Pode olhar à vontade, mas minha mochila não está à venda!',
+         'Você tem jeito de explorador. Acertei?',
+         'Não se esqueça de aproveitar a paisagem!'
+      ],
+
+      avisos:[
+         'O sol está desaparecendo. Procure abrigo antes que escureça!',
+         'Não ouviu os lobos ontem? Eles estão chegando cada vez mais perto.',
+         'Nunca entre em cavernas profundas sem estar preparado.',
+         'Se encontrar uma onça, não tente enfrentá-la desprotegido!',
+         'Guarde comida. Você nunca sabe quando precisará dela.',
+         'Não subestime os ursos. Eles são muito mais fortes do que parecem.',
+         'Sempre tenha uma rota de fuga quando explorar lugares perigosos.',
+         'Cuidado com as cobras escondidas na vegetação!',
+         'Uma cama pode salvar sua jornada. Não se esqueça de preparar uma.',
+         'Se ouvir passos na floresta durante a noite, fique atento!'
+      ],
+
+      historias:[
+         'Dizem que existe um minério azul escondido nas profundezas...',
+         'Meu avô jurava que havia diamantes muito abaixo destas terras.',
+         'Uma vez encontramos um lago cheio de peixes coloridos.',
+         'Há lugares neste mundo que ainda não aparecem em nenhum mapa.',
+         'Antigamente, nossa caravana atravessava desertos por semanas.',
+         'Encontrei uma caverna tão profunda que não conseguia enxergar o fundo.',
+         'Dizem que os animais sabem quando uma tempestade está chegando.',
+         'Já encontrei ouro em lugares onde ninguém imaginaria procurar.',
+         'Cada montanha esconde uma história. Basta ter coragem para explorá-la.',
+         'Um dia quero conhecer todos os cantos deste mundo.'
+      ],
+
+      humor:[
+         'Se encontrar uma maçã pelo caminho, lembre-se de mim!',
+         'Meu irmão diz que constrói uma casa em cinco minutos. Nunca acredite nele.',
+         'Eu deveria estar trabalhando... mas esta sombra está boa demais.',
+         'Você constrói casas. Nós construímos histórias!',
+         'Minha mochila está pesada. Acho que trouxe coisas demais novamente.',
+         'Se eu pudesse, passaria o dia inteiro perto da fogueira.',
+         'Hoje prometi trabalhar bastante. Amanhã começo!',
+         'Você já tentou contar quantas estrelas existem? Eu desisti!',
+         'Não conte ao chefe, mas tirei uma soneca depois do almoço.',
+         'A melhor ferramenta de sobrevivência? Saber quando correr!'
+      ]
+   };
+
 const ROBES=[['#d8c090','#b08a50','#f0e8d0'],['#3a5a8a','#2a4468','#d8d0c0'],['#a8402a','#80301e','#e8dcc0'],['#e8e0d0','#c8c0b0','#a8402a'],['#6a7a3a','#4e5a2a','#e0d4a8']];
 const SKINS=['#c68a5a','#a8693e','#8a5232','#d8a070'];
 const MAXN=Math.max(5,VILLAGE.doors.length);   // quantos nômades vivem na aldeia
