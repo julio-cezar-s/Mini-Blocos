@@ -213,7 +213,7 @@ updA=function(a,dt){
       a.th=Math.atan2(dx,dz);
 
       // Evita conversas repetidas e excesso de mensagens
-      if(a.talkT<=0&&now-lastTalk>2200){
+      if(a.talkT<=0&&now-lastTalk>8000){
 
         const first=!a.metPlayer;
         a.metPlayer=true;
@@ -226,10 +226,10 @@ updA=function(a,dt){
           message=getNomadDialogue(a,looking);
         }
 
-        a.talkT=first?18:24;
+        a.talkT=60;
         lastTalk=now;
 
-        toast('🧕 '+a.nm+': “'+message+'”');
+        toast('🧕 '+a.nm+': “'+message+'”',7000);
 
         // Presentes ocasionais
         if(a.giftT<=0&&Math.random()<.20){
