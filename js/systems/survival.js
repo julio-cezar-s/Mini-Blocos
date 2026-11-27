@@ -33,7 +33,9 @@ function bedSpawn(){if(!bedPos)return null;const bx=Math.floor(bedPos[0]),bz=Mat
   if(standOk(bx,by,bz))return{x:bx+.5,y:by+1.01,z:bz+.5};
   for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)for(const dy of[0,-1,1])if((dx||dz)&&standOk(bx+dx,by+dy,bz+dz))return{x:bx+dx+.5,y:by+dy+1.01,z:bz+dz+.5};
   return safeSpawn(bx,bz);}
-function respawn(){let sp=null,msg='Você desmaiou e voltou ao início';
+function respawn(){
+  playerDead=false;
+  let sp=null,msg='Você desmaiou e voltou ao início';
   if(bedPos){const b=bedSpawn();if(b===undefined){bedPos=null;msg='Você desmaiou. Sua cama foi destruída: voltou ao início';}else sp=b;}
   if(!sp)sp=safeSpawn(SP0[0],SP0[1]);
   if(sp){P.x=sp.x;P.y=sp.y;P.z=sp.z;}
