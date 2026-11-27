@@ -80,12 +80,15 @@ window.__ldr=(function(){
   <div class="tb" id="bj">⤒</div>
   <div class="tb" id="bm">Quebrar</div>
 </div>
-<div id="msg"><h1>🧱 MiniBlocos</h1>
-<p><b>Clique para jogar</b></p>
-<p>WASD mover · Espaço pular · Mouse olhar</p>
-<p>Clique esquerdo quebra · direito coloca</p>
-<p>1–6 ou roda do mouse escolhem o bloco · E inventário</p><p>Q troca a ferramenta · R troca o bloco do slot · M abre o mapa · segure o clique para minerar · Esc sai</p>
-<p>No celular: arraste para olhar, toque para agir</p><p>O mundo é salvo automaticamente</p><p><span id="netopen2">🌐 Jogar online com amigos</span></p></div>
+<div id="msg"><div class="mcard">
+<div class="mlogo">🧱</div><h1>MiniBlocos</h1><div class="msub">Construa, explore e sobreviva</div>
+<div class="mplay"><span class="mpc">▶ Clique para jogar</span><span class="mtc">▶ Toque para jogar</span></div>
+<div class="mnet" id="netopen2">🌐 Jogar online com amigos</div>
+<div class="mh">Controles</div>
+<div class="mgrid mpc"><div class="mrow"><span>Mover</span><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span></div><div class="mrow"><span>Pular</span><span><kbd>Espaço</kbd></span></div><div class="mrow"><span>Olhar</span><span><kbd>Mouse</kbd></span></div><div class="mrow"><span>Quebrar / minerar</span><span><kbd>Clique esq.</kbd></span></div><div class="mrow"><span>Colocar bloco</span><span><kbd>Clique dir.</kbd></span></div><div class="mrow"><span>Escolher bloco</span><span><kbd>1–6</kbd><kbd>Roda</kbd></span></div><div class="mrow"><span>Inventário</span><span><kbd>E</kbd></span></div><div class="mrow"><span>Trocar ferramenta</span><span><kbd>Q</kbd></span></div><div class="mrow"><span>Trocar bloco do slot</span><span><kbd>R</kbd></span></div><div class="mrow"><span>Mapa</span><span><kbd>M</kbd></span></div><div class="mrow"><span>Pausar / sair</span><span><kbd>Esc</kbd></span></div></div>
+<div class="mgrid mtc"><div class="mrow"><span>Olhar</span><span><kbd>Arrastar</kbd></span></div><div class="mrow"><span>Agir (colocar, usar)</span><span><kbd>Tocar</kbd></span></div><div class="mrow"><span>Mover</span><span><kbd>▲</kbd><kbd>◀</kbd><kbd>▶</kbd><kbd>▼</kbd></span></div><div class="mrow"><span>Pular</span><span><kbd>⤒</kbd></span></div><div class="mrow"><span>Quebrar / minerar</span><span><kbd>Quebrar</kbd></span></div><div class="mrow"><span>Inventário</span><span><kbd>🎒</kbd></span></div><div class="mrow"><span>Mapa</span><span><kbd>🌍 Mapa</kbd></span></div><div class="mrow"><span>Comer</span><span><kbd>🍖 Comer</kbd></span></div></div>
+<div class="mfoot">💾 O mundo é salvo automaticamente</div>
+</div></div>
 
 <!-- three.js r128: usa lib/three.min.js (funciona offline); se o arquivo não existir, tenta o CDN -->
 <script>
@@ -162,6 +165,7 @@ var CSS=[
  'js/entities/animals.js',
  'js/entities/predators.js',
  'js/entities/nomads.js',
+ 'js/entities/monkeys.js',
  'js/entities/fish.js',
  'js/render/sky.js',
  'js/render/atmosphere.js',
