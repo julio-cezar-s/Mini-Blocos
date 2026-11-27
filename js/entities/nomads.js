@@ -249,27 +249,27 @@ updA=function(a,dt){
   _updA(a,dt);
 };
 
-// ---------- reposição de moradores ----------
-let chkT=0;
-const _resp=respawnAnimals;
 
-respawnAnimals=function(dt){
-  _resp(dt);
-  chkT+=dt;
+  // ---------- reposição de moradores ----------
+  let chkT=0;
+  const _resp=respawnAnimals;
 
-  if(chkT<30)return;
-  chkT=0;
+  respawnAnimals=function(dt){
+    _resp(dt);
+    chkT+=dt;
 
-  if(count()<MAXN){
-    const d=VILLAGE.doors[
-      Math.floor(Math.random()*VILLAGE.doors.length)
-    ];
+    if(chkT<30)return;
+    chkT=0;
 
-    if(d)spawnNomad(d.x,d.z);
-  }
-};
+    if(count()<MAXN){
+      const d=VILLAGE.doors[
+        Math.floor(Math.random()*VILLAGE.doors.length)
+      ];
+
+      if(d)spawnNomad(d.x,d.z);
+    }
+  };
 })();
-
 
 // repõe nômades que sumirem (ex.: ficaram presos num bloco): confere de 30 em 30 segundos
 let chkT=0;const _resp=respawnAnimals;
