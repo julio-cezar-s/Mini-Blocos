@@ -46,13 +46,32 @@ const localThree=fs.existsSync('lib/three.min.js');
 if(fs.existsSync('lib'))fs.cpSync('lib','dist/lib',{recursive:true});
 const THREE_CDN='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
 const threeSrc=localThree?'lib/three.min.js':THREE_CDN;
+const threeSize=localThree?fs.statSync('lib/three.min.js').size:610000;   // tamanho aproximado do CDN (só para a barra)
+const jsSize=Buffer.byteLength(js);
 
-// 6) troca o carregador (último <script> do index.html) por 1 CSS + three.js + 1 JS
+// 6) troca o carregador (último <script> do index.html) por um carregador com barra de progresso:
+//    baixa three.js e o jogo (mostrando o progresso real), executa e só libera o jogo depois da verificação (__ldr.finish)
 const start=html.lastIndexOf('<script>'),end=html.indexOf('</script>',start)+9;
 if(start<0||!html.slice(start,end).includes('Carregador'))fail('Não achei o bloco "Carregador" no fim do index.html.');
-const tags='<script src="'+threeSrc+'"></script>\n'+
-  '<script>if(!window.THREE){document.body.insertAdjacentHTML("beforeend","<div style=\\"position:fixed;inset:0;z-index:99;background:#12202b;color:#fff;font:16px/1.5 sans-serif;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px\\"><div><h2>Não foi possível carregar o three.js</h2><p>Conecte-se à internet e recarregue a página.</p></div></div>");}</script>\n'+
-  '<script src="'+jsName+'"></script>\n';
+const loader=`(function(){
+var L=window.__ldr,FILES=[{u:${JSON.stringify(threeSrc)},n:${threeSize},a:0,b:.35,t:'a biblioteca 3D'},{u:${JSON.stringify(jsName)},n:${jsSize},a:.35,b:.85,t:'o jogo'}];
+function wait(ms){return new Promise(function(r){setTimeout(r,ms);});}
+function dl(f,k){k=k||0;
+  return fetch(f.u).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);
+    if(!r.body||!r.body.getReader)return r.text();
+    var rd=r.body.getReader(),dec=new TextDecoder(),txt='',got=0;
+    return(function pump(){return rd.read().then(function(x){
+      if(x.done)return txt+dec.decode();
+      got+=x.value.length;txt+=dec.decode(x.value,{stream:true});
+      var p=Math.min(.98,got/f.n);L.set(f.a+(f.b-f.a)*p,'Baixando '+f.t+'… '+Math.floor(p*100)+'%');return pump();});})();})
+   .catch(function(e){if(k>=3)throw e;L.set(f.a,'Conexão instável, tentando de novo ('+(k+1)+'/3)…');return wait(600*(k+1)).then(function(){return dl(f,k+1);});});}
+function run(code,name){var s=document.createElement('script');s.text=code+'\\n//# sourceURL='+name;document.head.appendChild(s);}
+dl(FILES[0]).then(function(c){run(c,'three.min.js');L.set(FILES[0].b,'Baixando o jogo…');return dl(FILES[1]);}).then(function(c){
+  L.set(.88,'Montando o mundo… (pode levar alguns segundos)');L.busy();
+  return wait(80).then(function(){try{run(c,'game.js');}catch(e){L.fail('O jogo teve um erro ao iniciar ('+(e&&e.message||e)+'). Recarregue a página.',false);return;}L.finish();});
+}).catch(function(e){L.fail('Não consegui baixar o jogo ('+(e&&e.message||e)+'). Verifique a internet e recarregue.',false);});
+})();`;
+const tags='<script>'+loader+'</script>\n';
 let out=html.slice(0,start)+tags+html.slice(end);
 out=out.replace('</head>','<link rel="stylesheet" href="'+cssName+'">\n</head>');
 fs.writeFileSync('dist/index.html',out);
