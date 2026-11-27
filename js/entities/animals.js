@@ -233,13 +233,15 @@ function updA(a,dt){
   // aceleração: arranca e para aos poucos; só anda a toda velocidade quando já está de frente para o destino
   const vmax=a.rider?RIDE_V:s.v/S*(a.flee>0?2.4:1),want=a.mv?vmax*Math.max(0,Math.cos(e)):0;
   a.spd+=(want-a.spd)*Math.min(1,dt*(want>a.spd?4:7));
-  let blocked=false;
+    let blocked=false,byP=false;
   if(a.spd>.01){const v=a.spd*dt,n=Math.max(1,Math.ceil(v/.3)),dx=Math.sin(a.rot)*v/n,dz=Math.cos(a.rot)*v/n;
     for(let i=0;i<n;i++){
+      if(hitPlayerAnimal(a,a.x+dx,a.y,a.z,r,hh)){blocked=true;byP=true;break;}
       if(!hitB(a.x+dx,a.y,a.z,r,hh)&&(s.swim||!wet(a.x+dx,a.z)))a.x+=dx;else{blocked=true;break;}
+      if(hitPlayerAnimal(a,a.x,a.y,a.z+dz,r,hh)){blocked=true;byP=true;break;}
       if(!hitB(a.x,a.y,a.z+dz,r,hh)&&(s.swim||!wet(a.x,a.z+dz)))a.z+=dz;else{blocked=true;break;}}}
-  if(blocked){a.bl+=dt;if(a.gr&&a.bl<.5)a.vy=10;if(a.bl>.8){a.th=a.rot+(Math.random()<.5?-1:1)*(1.2+Math.random()*1.4);a.bl=0;}}else a.bl=0;
-  // separação: animais não ficam um dentro do outro
+  if(blocked){a.bl+=dt;if(!byP&&a.gr&&a.bl<.5)a.vy=10;if(a.bl>(byP?.5:.8)){a.th=a.rot+(Math.random()<.5?-1:1)*(1.2+Math.random()*1.4);a.bl=0;}}else a.bl=0;
+ // separação: animais não ficam um dentro do outro
   for(const b of animals){if(b===a)continue;const ddx=a.x-b.x,ddz=a.z-b.z,dd=Math.hypot(ddx,ddz),rr=(r+SPEC[b.k].r/S)*.9;
     if(dd>.001&&dd<rr){const p=(rr-dd)*.5*Math.min(1,dt*4),nx=a.x+ddx/dd*p,nz=a.z+ddz/dd*p;
       if(!hitB(nx,a.y,a.z,r,hh)&&(s.swim||!wet(nx,a.z)))a.x=nx;if(!hitB(a.x,a.y,nz,r,hh)&&(s.swim||!wet(a.x,nz)))a.z=nz;}}
