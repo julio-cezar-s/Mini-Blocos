@@ -270,9 +270,3 @@ updA=function(a,dt){
     }
   };
 })();
-
-// repõe nômades que sumirem (ex.: ficaram presos num bloco): confere de 30 em 30 segundos
-let chkT=0;const _resp=respawnAnimals;
-respawnAnimals=function(dt){_resp(dt);chkT+=dt;if(chkT<30)return;chkT=0;
-  if(count()<MAXN){const d=VILLAGE.doors[Math.floor(Math.random()*VILLAGE.doors.length)];spawnNomad(d.x,d.z);}};
-})();
