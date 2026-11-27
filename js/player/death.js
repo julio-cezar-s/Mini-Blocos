@@ -1,4 +1,3 @@
-
 /* MiniBlocos · Personagem e animação de morte */
 
 let deathActor = null;
@@ -56,4 +55,68 @@ function createDeathActor(){
   actor.userData.rightArm = rightArm;
 
   return actor;
+}
+
+// Inicia a animação de morte
+function startDeathAnimation(){
+  if(deathAnimation)return;
+
+  deathActor=createDeathActor();
+  deathActor.position.set(P.x,P.y,P.z);
+  deathActor.rotation.y=P.yaw;
+
+  scene.add(deathActor);
+
+  deathAnimation={
+    time:0,
+    startY:P.y,
+    duration:2.2
+  };
+}
+
+// Atualiza a queda do personagem
+function updateDeathAnimation(dt){
+  if(!deathAnimation||!deathActor)return false;
+
+  deathAnimation.time+=dt;
+
+  const t=Math.min(
+    deathAnimation.time/deathAnimation.duration,
+    1
+  );
+
+  // Inclina o corpo até cair no chão
+  const fall=Math.min(t*1.5,1);
+  deathActor.rotation.z=-fall*(Math.PI/2);
+
+  // Movimento dos braços durante a queda
+  const arms=deathActor.userData;
+  arms.leftArm.rotation.x=-fall*0.9;
+  arms.rightArm.rotation.x=fall*0.9;
+
+  // Pequeno movimento para dar sensação de queda
+  deathActor.position.y=
+    deathAnimation.startY-Math.sin(t*Math.PI/2)*0.35;
+
+  return deathAnimation.time>=deathAnimation.duration;
+}
+
+// Remove o boneco temporário da cena
+function clearDeathAnimation(){
+  if(deathActor){
+    scene.remove(deathActor);
+    deathActor.traverse(obj=>{
+      if(obj.isMesh){
+        obj.geometry.dispose();
+        if(Array.isArray(obj.material)){
+          obj.material.forEach(m=>m.dispose());
+        }else{
+          obj.material.dispose();
+        }
+      }
+    });
+  }
+
+  deathActor=null;
+  deathAnimation=null;
 }
