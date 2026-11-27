@@ -47,7 +47,7 @@ function eat(){if(cooked+meat+apples<=0){toast('Sem comida: bata nos animais ou 
 function vitals(dt){
   furnTick(dt);
   for(let i=cooks.length-1;i>=0;i--){const c=cooks[i];c.t-=dt;if(c.t<=0){cooked+=c.n;cooks.splice(i,1);toast('🍗 '+c.n+' carne assada pronta!');}}
-  if(playing){
+  if(playing&&!playerDead){
     const moving=P.vx||P.vz;hungerT+=dt*(moving?1.6:1);if(hungerT>=20){hungerT=0;if(food>0)food--;}
     regT+=dt;
     if(!playerDead){
