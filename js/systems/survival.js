@@ -10,9 +10,10 @@ function damage(n){
   flash();
 
   if(hp<=0){
-    playerDead=true;
-    startDeathAnimation();
-  }
+  playerDead=true;
+  console.log('[MORTE] Iniciando animação');
+  startDeathAnimation();
+  console.log('[MORTE] Estado:', deathAnimation, deathActor);
 }
 // ---- respawn seguro: nunca na água, em cima de árvore, em parede ou na cama destruída ----
 // ponto onde dá para ficar de pé: bloco sólido (não folha) com 3 células livres acima e sem água na altura do corpo
