@@ -128,6 +128,16 @@ function mk(k){const s=SPEC[k],g=new THREE.Group(),bg=new THREE.Group(),[bw,bh,b
 const aSlope=(x,y,z)=>{if(x<0||z<0||y<0||x>=W||z>=D||y>=H)return false;const b=B[idx(x,y,z)];return b>=26&&b<=33;};
 function hitB(px,py,pz,r,hh){
   for(let x=Math.floor(px-r);x<=Math.floor(px+r);x++)for(let y=Math.floor(py);y<=Math.floor(py+hh);y++)for(let z=Math.floor(pz-r);z<=Math.floor(pz+r);z++)if(solid(x,y,z)||aSlope(x,y,z))return true;return false;}
+// Impede os animais de atravessarem o corpo durante a animação de morte
+function hitDeathBody(x,z,r){
+  if(!playerDead||!deathActor)return false;
+
+  const dx=x-deathActor.position.x;
+  const dz=z-deathActor.position.z;
+  const minDist=.65+r;
+
+  return dx*dx+dz*dz<minDist*minDist;
+}
 // animal preso dentro de um bloco (alguém colocou um bloco, fechou porta/portão ou o terreno mudou em cima dele): tira de lá
 function unstick(a,r,hh){
   for(let dy=.25;dy<=2.5;dy+=.25)if(!hitB(a.x,a.y+dy,a.z,r,hh)){a.y+=dy;a.vy=0;return true;}   // sobe um pouco
