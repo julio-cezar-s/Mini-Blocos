@@ -105,12 +105,25 @@ function updateDeathAnimation(dt){
   if(!deathAnimation||!deathActor)return false;
 
   deathAnimation.time+=dt;
-
+  
   const t=Math.min(
     deathAnimation.time/deathAnimation.duration,
     1
   );
 
+  // Câmera se afasta suavemente e acompanha o personagem
+  camera.position.lerpVectors(
+  deathAnimation.cameraStart,
+  deathAnimation.cameraEnd,
+  t
+);
+  
+  camera.lookAt(
+  deathActor.position.x,
+  deathActor.position.y,
+  deathActor.position.z
+);
+  
   const body=deathActor.userData.body;
   const arms=deathActor.userData;
 
