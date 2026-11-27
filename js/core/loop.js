@@ -3,6 +3,17 @@
 let last=performance.now(),bedrockT=-1e9,stepOff=0;   // stepOff: suaviza a câmera em degraus (a física continua instantânea)
 function frame(now){
   const dt=Math.min((now-last)/1000,.05);last=now;
+  if(playerDead){
+  const finished=updateDeathAnimation(dt);
+
+  if(finished){
+    clearDeathAnimation();
+    respawn();
+  }
+
+  renderer.render(scene,camera);
+  return;
+}
   if(playing&&!(mounted&&rideTick(dt))){   // montado: o cavalo anda no lugar do jogador (ride.js)
     const f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0)+tk.f;
     const s=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+tk.s;
