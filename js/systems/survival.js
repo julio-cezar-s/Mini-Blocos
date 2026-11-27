@@ -50,8 +50,16 @@ function vitals(dt){
   if(playing){
     const moving=P.vx||P.vz;hungerT+=dt*(moving?1.6:1);if(hungerT>=20){hungerT=0;if(food>0)food--;}
     regT+=dt;
-    if(food>=14&&hp<20&&regT>=4){hp++;regT=0;}
-    else if(food<=0&&hp>2&&regT>=4){damage(1);regT=0;}
+    if(!playerDead){
+      if(food>=14&&hp<20&&regT>=4){
+        hp++;
+        regT=0;
+      }
+      else if(food<=0&&hp>2&&regT>=4){
+        damage(1);
+        regT=0;
+      }
+    }
     if(get(Math.floor(P.x),Math.floor(P.y+EY),Math.floor(P.z))===8){airT+=dt;if(airT>=1.5){airT=0;if(air>0)air--;else damage(2);}}
     else{air=Math.min(10,air+dt*6);airT=0;}
   }
