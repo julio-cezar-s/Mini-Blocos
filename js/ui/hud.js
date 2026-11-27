@@ -8,5 +8,13 @@ function updateHud(){const key=hp+','+food+','+Math.ceil(air)+','+meat+','+apple
   hudEl.innerHTML=icons(hp,'#e23b3b','#3b2a2a',HS);foodEl.innerHTML=icons(food,'#c86a2a','#3a3028',FS);
   const ca=Math.max(0,Math.ceil(air));airEl.style.display=ca<10?'flex':'none';airEl.innerHTML=icons(ca*2,'#6cc4ff','#2a3a48',AS);
   eatEl.textContent='🍖 Comer ('+(cooked+meat+apples)+')';}
-function toast(t){const e=document.getElementById('toast');e.textContent=t;e.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>e.style.display='none',2400);}
+function toast(t,duration){
+  const e=document.getElementById('toast');
+  e.textContent=t;
+  e.style.display='block';
+  clearTimeout(toast.h);
+  toast.h=setTimeout(()=>{
+    e.style.display='none';
+  },duration||2400);
+}
 function flash(){const h=document.getElementById('hurt');h.style.transition='none';h.style.opacity='.9';setTimeout(()=>{h.style.transition='opacity .6s';h.style.opacity='0';},40);}
