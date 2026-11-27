@@ -2,7 +2,7 @@
 const amb=new THREE.AmbientLight(0xffffff,.8);scene.add(amb);
 const dl=new THREE.DirectionalLight(0xffffff,.6);dl.position.set(1,2,1.5);scene.add(dl);
 // dia e noite: escurece os blocos por shader, céu, sol, lua e estrelas
-const DAYLEN=300,uDark={value:1},uLP={value:new THREE.Vector3()},uLO={value:0},clockEl=document.getElementById('clock');let dayT=.3;
+const DAYLEN=1200,uDark={value:1},uLP={value:new THREE.Vector3()},uLO={value:0},clockEl=document.getElementById('clock');let dayT=.3;
 function patchMat(m){m.onBeforeCompile=s=>{s.uniforms.uDark=uDark;s.uniforms.uLP=uLP;s.uniforms.uLO=uLO;
   s.vertexShader=s.vertexShader.replace('#include <common>',`#include <common>
 attribute float fb;
