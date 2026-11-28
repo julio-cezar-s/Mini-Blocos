@@ -8,7 +8,7 @@ function slopeY(t,lx,lz){const o=(t-26)&3,p=o===0?lx:(o===1?1-lx:(o===2?lz:1-lz)
 // O corpo é um quadrado de lado ~1 bloco (mesmo tamanho usado por hit() nos blocos comuns). Rampas e escadas amostram os 4 cantos desse
 // quadrado (a altura é monotônica dentro de cada célula, então o máximo sempre está num canto): o jogador apoia no ponto mais alto sob ele,
 // como uma caixa sobre uma ladeira, e não entra mais de lado na rampa (antes só o ponto central era testado).
-const PR=.3/S-1e-4,RAMP_PTS=[[-1,-1],[1,-1],[-1,1],[1,1]];
+const PR=PRAD-1e-4,RAMP_PTS=[[-1,-1],[1,-1],[-1,1],[1,1]];
 function rampSurface(px,py,pz){let best=null;const y0=Math.floor(py);
   for(const [sx,sz] of RAMP_PTS){const qx=px+sx*PR,qz=pz+sz*PR,xi=Math.floor(qx),zi=Math.floor(qz);
     for(let cy=y0;cy>=y0-1;cy--){const t=get(xi,cy,zi);if(t>=26&&t<=33){const h=cy+slopeY(t,qx-xi,qz-zi);if(h<=py+1.02&&(best===null||h>best))best=h;}}}
