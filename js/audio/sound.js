@@ -5,6 +5,7 @@
 const AC=window.AudioContext||window.webkitAudioContext;
 let ctx=null,bus=null,lpf=null,nbuf=null,muted=false,active=0;
 const VOL=.8;
+const SOM_NOMADE=false,SOM_FOGUEIRA=false,VOL_PASSOS=.3;
 try{muted=localStorage.getItem('mb_mute')==='1';}catch(e){}
 const rnd=Math.random,clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 
