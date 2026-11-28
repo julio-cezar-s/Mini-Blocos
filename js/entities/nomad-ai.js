@@ -154,7 +154,11 @@ function deposit(a){const c=a.ai.carry,st=store();
   if(chestOK()){for(const k in c){if(k==='f')FOOD.fish+=c[k];else if(k==='ap')FOOD.apples+=c[k];else st[k]=(st[k]||0)+c[k];}a.ai.carry={};sfx(a,'wood','place');}}
 
 // ---------- IA ----------
-function newAI(a){const cnt={};animals.forEach(n=>{if(n.k==='nomad'&&n.ai)cnt[n.ai.job]=(cnt[n.ai.job]||0)+1;});
+let warned=false;
+function warn(e){console.error('[nomad-ai]',e);if(warned)return;warned=true;try{toast('⚠️ Erro na IA dos nômades: '+(e&&e.message?e.message:e));}catch(_){}}
+let announced=false;
+function newAI(a){if(!announced){announced=true;try{toast('🧕 IA dos nômades ligada');}catch(_){}}
+  const cnt={};animals.forEach(n=>{if(n.k==='nomad'&&n.ai)cnt[n.ai.job]=(cnt[n.ai.job]||0)+1;});
   let job=JOBS[0],mn=1e9;JOBS.forEach(j=>{if((cnt[j]||0)<mn){mn=cnt[j]||0;job=j;}});
   let hm_=HOMES[0],hn=1e9;HOMES.forEach(h=>{if(h.n<hn){hn=h.n;hm_=h;}});hm_.n++;
   const ai={job,home:hm_,q:0,st:'idle',t:0,dt:.016,carry:{},tg:null,wt:0,cool:rnd()*2,seat:null,sp:WALK,side:rnd()<.5?1:-1,safeT:0};
@@ -269,12 +273,12 @@ const _updA=updA;
 updA=function(a,dt){
   if(a.k!=='nomad'||a.rider){_updA(a,dt);return;}
   let mult=1;
-  try{mult=think(a,dt)||1;}catch(e){console.error('[nomad-ai]',e);if(a.ai){release(a);a.ai.st='idle';}mult=1;}
+  try{mult=think(a,dt)||1;}catch(e){warn(e);if(a.ai){try{release(a);}catch(_){}a.ai.st='idle';}mult=1;}
   a.tt=Math.max(a.tt||0,.5);            // impede o passeio aleatório dos animais: quem decide é a IA
   if(!(a.flee>0))a.flee=1e-4;          // pula a lógica antiga de "cumprimentar / voltar para a aldeia"
   const s=SPEC.nomad,o=s.v;s.v=o*mult;
   try{_updA(a,dt);}finally{s.v=o;}
-  try{pose(a,dt);}catch(e){}
+  try{pose(a,dt);}catch(e){warn(e);}
 };
 window.NOMAD_AI={FOOD,CHEST,BENCH,claims};
 })();
