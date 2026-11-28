@@ -166,7 +166,7 @@ function tick(now){
   for(const a of animals){const s=SPEC[a.k];if(!s||!s.pred)continue;const ag=a.ag>0;if(ag&&!a._ag)cry(a.k,'growl',a.x,a.z);a._ag=ag;}
   // fogueira estalando por perto
   fireT-=dt;
-  if(fireT<=0){fireT=.15+rnd()*.5;let best=null,bd=9;for(const f of fires){if(f.lamp)continue;const d=Math.hypot(f.x+.5-P.x,f.z+.5-P.z);if(d<bd){bd=d;best=f;}}
+    if(SOM_FOGUEIRA&&fireT<=0){fireT=.15+rnd()*.5;let best=null,bd=9;for(const f of fires){if(f.lamp)continue;const d=Math.hypot(f.x+.5-P.x,f.z+.5-P.z);if(d<bd){bd=d;best=f;}}
     if(best){const k=Math.pow(1-bd/9,1.5),pan=bd>.5?((best.x+.5-P.x)*Math.cos(P.yaw)-(best.z+.5-P.z)*Math.sin(P.yaw))/bd:0;
       noise({d:.03+rnd()*.05,v:.25*k,type:'highpass',f:2500+rnd()*2000,pan});if(rnd()<.2)tone({f:900+rnd()*600,f2:300,d:.04,v:.12*k,pan});}}
   // ambiente: passarinhos de dia, grilos à noite (só ao ar livre, acima do nível da água)
