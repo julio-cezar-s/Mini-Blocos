@@ -6,7 +6,8 @@ function hold(id,fn){const e=document.getElementById(id);
   e.addEventListener('touchend',ev=>{ev.preventDefault();fn(0);},{passive:false});
   e.addEventListener('touchcancel',ev=>{ev.preventDefault();fn(0);},{passive:false});}
 const dpad={bu:0,bd:0,bl:0,br:0};const dpadUpdate=()=>{tk.f=dpad.bu-dpad.bd;tk.s=dpad.br-dpad.bl;};
-hold('bu',v=>{dpad.bu=v;dpadUpdate();});hold('bd',v=>{dpad.bd=v;dpadUpdate();});hold('bl',v=>{dpad.bl=v;dpadUpdate();});hold('br',v=>{dpad.br=v;dpadUpdate();});hold('bj',v=>keys.Space=!!v);
+let sprint=false,lastUp=0;
+hold('bu',v=>{if(v){const n=Date.now();sprint=n-lastUp<350;lastUp=sprint?0:n;}else sprint=false;dpad.bu=v;dpadUpdate();});
 const bm=document.getElementById('bm');
 bm.addEventListener('touchstart',e=>{e.preventDefault();placeMode=!placeMode;bm.textContent=placeMode?'Colocar':'Quebrar';},{passive:false});
 let lt=null,moved=0,t0=0,mtm=0;
