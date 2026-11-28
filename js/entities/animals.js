@@ -144,7 +144,7 @@ function hitPlayerAnimal(a,x,y,z,r,hh){
     px=P.x;
     py=P.y;
     pz=P.z;
-    pr=.3/S;
+    pr=PRAD;
     ph=PH;
   }
 
