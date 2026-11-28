@@ -64,8 +64,7 @@ function mat(t){
 // kind: break | place | dig (martelando) | step ; m = multiplicador de volume
 function blockSnd(m,kind,pan,mul){
   if(!ready())return;
-   const ld=(kind==='break'?1:kind==='place'?.75:kind==='dig'?.55:.42*VOL_PASSOS)*(mul||1),
-   switch(m){
+     const ld=(kind==='break'?1:kind==='place'?.75:kind==='dig'?.55:.42*VOL_PASSOS)*(mul||1),L=kind==='break'?.2:kind==='place'?.12:kind==='dig'?.1:.08,r=.88+rnd()*.24;   switch(m){
     case'dirt':noise({d:L,v:.5*ld,type:'lowpass',f:800*r,f2:300,pan});tone({f:120*r,f2:60,d:L,v:.4*ld,pan});break;
     case'sand':noise({d:L*1.3,v:.3*ld,type:'bandpass',f:2600*r,q:.5,pan});break;
     case'snow':noise({d:L*1.5,v:.35*ld,type:'bandpass',f:3600*r,f2:1800,q:.6,pan});break;
