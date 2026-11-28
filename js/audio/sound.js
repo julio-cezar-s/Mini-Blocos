@@ -22,7 +22,7 @@ function init(){
   }catch(e){ctx=null;}
 }
 function unlock(){init();if(ctx&&ctx.state!=='running'&&!muted)ctx.resume();}
-['pointerdown','touchstart','mousedown','keydown','click'].forEach(ev=>addEventListener(ev,unlock,{capture:true,passive:true}));
+['pointerdown','touchstart','mousedown','keydown','click','touchend','pointerup','mouseup'].forEach(ev=>addEventListener(ev,unlock,{capture:true,passive:true}));
 document.addEventListener('visibilitychange',()=>{if(!ctx)return;if(document.hidden)ctx.suspend();else if(!muted)ctx.resume();});
 const ready=()=>ctx&&ctx.state==='running'&&!muted&&active<48;
 
