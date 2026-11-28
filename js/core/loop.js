@@ -17,7 +17,7 @@ function frame(now){
   if(playing&&!(mounted&&rideTick(dt))){   // montado: o cavalo anda no lugar do jogador (ride.js)
     const f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0)+tk.f;
     const s=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+tk.s;
-    const fx=Math.floor(P.x),fy=Math.floor(P.y+.05),fz=Math.floor(P.z),inW=get(fx,fy,fz)===8;const sp=4.5/S*(inW?.55:1),sn=Math.sin(P.yaw),cs=Math.cos(P.yaw);
+    const fx=Math.floor(P.x),fy=Math.floor(P.y+.05),fz=Math.floor(P.z),inW=get(fx,fy,fz)===8;const sp=4.5/S*(inW?.55:1)*(sprint&&f>0?1.45:1),sn=Math.sin(P.yaw),cs=Math.cos(P.yaw);
     P.vx=(-sn*f+cs*s)*sp;P.vz=(-cs*f-sn*s)*sp;
     if(inW){P.vy-=6/S*dt;P.vy*=Math.max(0,1-3*dt);if(keys.Space)P.vy=Math.max(P.vy,get(fx,fy+1,fz)===8?5/S:8.5/S);}else P.vy-=24/S*dt;if(keys.Space&&P.ground&&!inW){P.vy=8/S;P.ground=false;}
     let nx=P.x+P.vx*dt;if(!hit(nx,P.y,P.z)&&(!rampWall(nx,P.y,P.z)||rampWall(P.x,P.y,P.z)))P.x=nx;else if(P.ground&&!hit(nx,P.y+1.02,P.z)&&!rampWall(nx,P.y+1.02,P.z)){P.x=nx;P.y+=1.02;stepOff-=1.02;}
