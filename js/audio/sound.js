@@ -182,7 +182,7 @@ function setMute(m){muted=m;try{localStorage.setItem('mb_mute',m?'1':'0');}catch
 const btn=document.createElement('div');btn.id='sndbtn';btn.textContent=muted?'🔇':'🔊';
 btn.style.cssText='position:fixed;right:calc(10px + env(safe-area-inset-right,0px));top:calc(156px + env(safe-area-inset-top,0px));width:36px
 ['pointerdown','touchstart','mousedown'].forEach(ev=>btn.addEventListener(ev,e=>e.stopPropagation()));
-btn.addEventListener('click',e=>{e.stopPropagation();init();setMute(!muted);});
+btn.style.cssText='position:fixed;right:calc(10px + env(safe-area-inset-right,0px));top:calc(156px + env(safe-area-inset-top,0px));width:36px;height:36px;border-radius:10px;background:#0006;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;z-index:5;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation';
 document.body.appendChild(btn);
 addEventListener('keydown',e=>{if(e.code==='KeyN'&&!e.repeat){init();setMute(!muted);}});
 
