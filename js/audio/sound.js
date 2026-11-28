@@ -76,7 +76,7 @@ function blockSnd(m,kind,pan,mul){
     case'water':noise({d:.2,v:.3*ld,type:'bandpass',f:1000,f2:600,pan});break;
     default:noise({d:L,v:.5*ld,type:'bandpass',f:1400*r,q:1.2,pan});tone({f:220*r,f2:110,d:L*.8,v:.35*ld,pan});
       if(kind==='break')noise({d:.08,v:.3*ld,type:'bandpass',f:2200*r,q:1,pan,delay:.06});}}
-function hoof(){tone({f:150,f2:90,d:.07,v:.3});noise({d:.05,v:.25,type:'bandpass',f:700,q:1});tone({f:140,f2:85,d:.07,v:.25,delay:.1});noise({d:.05,v:.2,type:'bandpass',f:700,q:1,delay:.1});}
+function hoof(){const q=VOL_PASSOS;tone({f:150,f2:90,d:.07,v:.3*q});noise({d:.05,v:.25*q,type:'bandpass',f:700,q:1});tone({f:140,f2:85,d:.07,v:.25*q,delay:.1});noise({d:.05,v:.2*q,type:'bandpass',f:700,q:1,delay:.1});}
 function splash(m){const ld=m||1;noise({d:.35,v:.45*ld,type:'bandpass',f:1200,f2:400,q:.6});noise({d:.25,v:.3*ld,type:'lowpass',f:350});tone({f:300,f2:120,d:.2,v:.2*ld});}
 
 // ---------- vozes dos animais ----------
