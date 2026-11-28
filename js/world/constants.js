@@ -1,5 +1,5 @@
 /* MiniBlocos · Dimensões do mundo, array de blocos B e helpers get/solid */
-const W=256,D=256,H=36;   // tamanho do mundo (múltiplos de 16). Era 96x96
+const W=320,D=320,H=36;   // tamanho do mundo (múltiplos de 16). Era 96x96
 const AF=W*D/9216,AA=Math.min(AF,1.5);   // AF: fator de área vs. o mundo antigo (minérios); AA: versão limitada para animais
 const B=new Uint8Array(W*D*H);
 const idx=(x,y,z)=>x+z*W+y*W*D;
