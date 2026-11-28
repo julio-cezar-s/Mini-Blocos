@@ -200,9 +200,13 @@ btn.style.cssText=[
 'touch-action:manipulation'
 ].join(';');
 ['pointerdown','touchstart','mousedown'].forEach(ev=>btn.addEventListener(ev,e=>e.stopPropagation()));
-btn.style.cssText='position:fixed;right:calc(10px + env(safe-area-inset-right,0px));top:calc(156px + env(safe-area-inset-top,0px));width:36px;height:36px;border-radius:10px;background:#0006;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;z-index:5;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation';
+let lastTog=0;
+const tog=e=>{e.stopPropagation();e.preventDefault();const n=Date.now();if(n-lastTog<400)return;lastTog=n;init();setMute(!muted);};
+btn.addEventListener('touchend',tog,{passive:false});
+btn.addEventListener('pointerup',tog);
+btn.addEventListener('click',tog);
 document.body.appendChild(btn);
 addEventListener('keydown',e=>{if(e.code==='KeyN'&&!e.repeat){init();setMute(!muted);}});
 
-window.SND={blockSnd,cry,tone,noise,mat,toggle:()=>setMute(!muted)};   // para chamar de outros arquivos: SND.tone({f:440,d:.2,v:.3})
+window.SND={blockSnd,cry,tone,noise,mat,toggle:()=>setMute(!muted)};
 })();
