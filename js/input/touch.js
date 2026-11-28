@@ -1,13 +1,13 @@
 /* MiniBlocos · Controles de toque (botões, olhar, quebrar/colocar) */
 // toque
-const tk={f:0,s:0};let placeMode=false;
+const tk={f:0,s:0,run:false};let placeMode=false;
 function hold(id,fn){const e=document.getElementById(id);
   e.addEventListener('touchstart',ev=>{ev.preventDefault();fn(1);},{passive:false});
   e.addEventListener('touchend',ev=>{ev.preventDefault();fn(0);},{passive:false});
   e.addEventListener('touchcancel',ev=>{ev.preventDefault();fn(0);},{passive:false});}
 const dpad={bu:0,bd:0,bl:0,br:0};const dpadUpdate=()=>{tk.f=dpad.bu-dpad.bd;tk.s=dpad.br-dpad.bl;};
-let sprint=false,lastUp=0;
-hold('bu',v=>{if(v){const n=Date.now();sprint=n-lastUp<350;lastUp=sprint?0:n;}else sprint=false;dpad.bu=v;dpadUpdate();});
+let lastUp=0;
+hold('bu',v=>{if(v){const n=Date.now();tk.run=n-lastUp<350;lastUp=tk.run?0:n;}else tk.run=false;dpad.bu=v;dpadUpdate();});
 hold('bd',v=>{dpad.bd=v;dpadUpdate();});
 hold('bl',v=>{dpad.bl=v;dpadUpdate();});
 hold('br',v=>{dpad.br=v;dpadUpdate();});
