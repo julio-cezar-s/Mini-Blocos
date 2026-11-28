@@ -85,6 +85,8 @@ const _mk=mk;mk=function(k){return(SPEC[k]&&SPEC[k].pred)?mkPred(k):_mk(k);};
 
 // ---------- comportamento ----------
 function los(a){for(let i=1;i<6;i++){const t=i/6,x=a.x+(P.x-a.x)*t,y=a.y+.6+(P.y+1-a.y-.6)*t,z=a.z+(P.z-a.z)*t;if(solid(Math.floor(x),Math.floor(y),Math.floor(z)))return false;}return true;}
+// luz de fogueira (raio 8) ou lampião (raio 5,5) afasta os predadores
+function lightNear(a){for(const f of fires){const R=f.lamp?5.5:8,dx=a.x-(f.x+.5),dz=a.z-(f.z+.5);if(dx*dx+dz*dz<R*R&&Math.abs(a.y-f.y)<6)return{x:f.x+.5,z:f.z+.5};}return null;}
 let poisN=0,poisT=0;
 const _updA=updA;
 updA=function(a,dt){
