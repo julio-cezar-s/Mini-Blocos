@@ -244,7 +244,7 @@ function updA(a,dt){
    // se o jogador andou para cima do animal, empurra o animal para fora (sem atravessar blocos)
   if(!a.rider){
     const dead=playerDead&&deathActor,px=dead?deathActor.position.x:P.x,pz=dead?deathActor.position.z:P.z,
-      py=dead?deathActor.position.y-1.42:P.y,ph=dead?2.55:PH,mn=(dead?.55:.3/S)+r,
+      py=dead?deathActor.position.y-1.42:P.y,ph=dead?2.55:PH,mn=(dead?.55:PRAD)+r,
       ddx=a.x-px,ddz=a.z-pz,dd=Math.hypot(ddx,ddz);
     if(dd<mn&&a.y+hh>py&&a.y<py+ph){
       const ux=dd>.001?ddx/dd:Math.sin(a.rot),uz=dd>.001?ddz/dd:Math.cos(a.rot),pu=(mn-dd)*Math.min(1,dt*10);
