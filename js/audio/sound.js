@@ -82,7 +82,7 @@ function splash(m){const ld=m||1;noise({d:.35,v:.45*ld,type:'bandpass',f:1200,f2
 // ---------- vozes dos animais ----------
 // mode: hurt (apanhou) | idle (ambiente, baixinho) | die | growl (predador percebeu o jogador)
 function cry(k,mode,x,z){
-  if(!ready())return;
+  if(!ready()||(k==='nomad'&&!SOM_NOMADE))return;
   const s=spat(x,z,mode==='idle'?16:26);if(!s)return;
   const pan=s.pan,vm=(mode==='idle'?.4:1)*Math.max(.18,s.k),pm=mode==='hurt'?1.12:mode==='die'?.78:mode==='idle'?.95+rnd()*.1:1,sl=mode==='die'?1.3:1;
   switch(k){
