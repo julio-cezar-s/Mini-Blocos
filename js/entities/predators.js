@@ -100,9 +100,11 @@ updA=function(a,dt){
   if(live&&(a.hit>0||(dist<s.det&&Math.abs(P.y-a.y)<8)))a.ag=a.hit>0?10:7;
   if(a.ag>0&&(!live||dist>s.lose))a.ag=0;
   if(a.ag>0&&!wasAg&&a.k==='wolf')for(const b of animals)if(b!==a&&b.k==='wolf'&&Math.hypot(b.x-a.x,b.z-a.z)<16)b.ag=Math.max(b.ag||0,7);
-  const scared=s.coward&&a.hp<AHP[a.k]*.3&&a.ag>0;
-  if(scared){a.th=Math.atan2(-dx,-dz);a.mv=true;a.gz=false;a.tt=.5;a.flee=.3;}
-  else if(a.ag>0){
+   const lz=lightNear(a);if(lz)a.ag=0;   // dentro da luz: perde o interesse e foge
+   const scared=s.coward&&a.hp<AHP[a.k]*.3&&a.ag>0;
+   if(lz){a.th=Math.atan2(a.x-lz.x,a.z-lz.z);a.mv=true;a.gz=false;a.tt=.5;a.al=0;a.flee=.4;}
+   else if(scared){a.th=Math.atan2(-dx,-dz);a.mv=true;a.gz=false;a.tt=.5;a.flee=.3;}
+   else if(a.ag>0){
     a.th=Math.atan2(dx,dz);a.gz=false;a.tt=.5;a.al=0;a.flee=.25;   // flee>0 = corre 2,4x mais rápido e vira rápido
     const near=dist<s.reach*.8;a.mv=!near;
     a.lp=Math.max(0,(a.lp||0)-dt);
